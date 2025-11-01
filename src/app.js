@@ -10,6 +10,7 @@ import attendanceRouter from './routes/attendance.js';
 import { migrate, ensureDefaultTeacher } from './db.js';
 import reportsRouter from './routes/reports.js';
 import importRouter from './routes/import.js';
+import periodsRouter from './routes/periods.js';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use('/', dashboardRouter);
 app.use('/', attendanceRouter);
 app.use('/', reportsRouter);
 app.use('/', importRouter);
+app.use('/', periodsRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });

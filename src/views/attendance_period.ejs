@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title>Period Attendance - <%= klass.name %></title>
+  <style>
+    .grid { display: grid; gap: 8px; }
+    .period-row { display: grid; gap: 4px; }
+    .period-row div, .header div { padding: 6px; border-bottom: 1px solid #e5e7eb; }
+    .header { display: grid; font-weight: 600; background: #fff; }
+    .center { text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/dashboard">← Dashboard</a>
+    <form method="post" action="/logout"><button type="submit">Logout</button></form>
+  </div>
+  <div class="container">
+    <h1>Period Attendance - <%= klass.name %> <span class="muted">Section <%= klass.section || '-' %></span></h1>
+
+    <form method="get" action="">
+      <label>Date</label>
+      <input type="date" name="date" value="<%= date %>">
+      <button type="submit">Load</button>
+      <% if (typeof saved !== 'undefined') { %><span class="muted">Saved</span><% } %>
+    </form>
+
+    <form method="post" action="/class/<%= klass.id %>/period-attendance">
+      <input type="hidden" name="date" value="<%= date %>">
+      <div class="header" style="grid-template-columns: 100px repeat(<%= periods.length %>, 1fr);">
+        <div>Roll/Name</div>
+        <% periods.forEach(p => { %>
+          <div class="center"><%= p.name %><br><span class="muted"><%= p.start_time || '' %> - <%= p.end_time || '' %></span></div>
+        <% }) %>
+      </div>
+      <% students.forEach(s => { %>
+        <div class="period-row" style="grid-template-columns: 100px repeat(<%= periods.length %>, 1fr);">
+          <div><%= s.roll_no || '-' %> - <%= s.name %></div>
+          <% periods.forEach(p => { %>
+            <div class="center">
+              <input type="checkbox" name="present_<%= s.id %>_<%= p.id %>" <%= presentMap.get(`${s.id}_${p.id}`) ? 'checked' : '' %> />
+            </div>
+          <% }) %>
+        </div>
+      <% }) %>
+      <div class="actions" style="margin-top:12px">
+        <button type="submit">Save Period Attendance</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

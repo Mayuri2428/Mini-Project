@@ -42,6 +42,30 @@ async function migrate() {
     password_hash TEXT NOT NULL
   );`);
 
+  await run(`CREATE TABLE IF NOT EXISTS periods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    start_time TEXT,
+    end_time TEXT,
+    UNIQUE(class_id, name),
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
+  );`);
+
+  await run(`CREATE TABLE IF NOT EXISTS attendance_period (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    period_id INTEGER NOT NULL,
+    class_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    present INTEGER NOT NULL CHECK (present IN (0,1)),
+    note TEXT,
+    UNIQUE(date, period_id, student_id),
+    FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+  );`);
+
   await run(`CREATE TABLE IF NOT EXISTS classes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -123,6 +147,19 @@ async function seed() {
       `${s.name} Parent`, `${s.name.split(' ')[0].toLowerCase()}@example.com`, '+911234567890', 'email', s.id
     ]);
   }
+
+  // default 6 periods for the class
+  const defaultPeriods = [
+    ['Period 1','09:00','09:45'],
+    ['Period 2','09:50','10:35'],
+    ['Period 3','10:40','11:25'],
+    ['Period 4','11:30','12:15'],
+    ['Period 5','12:45','13:30'],
+    ['Period 6','13:35','14:20']
+  ];
+  for (const [name, st, et] of defaultPeriods) {
+    await run(`INSERT OR IGNORE INTO periods (class_id, name, start_time, end_time) VALUES (?,?,?,?)`, [klass.id, name, st, et]);
+  }
 }
 
 async function ensureDefaultTeacher(email, password) {
@@ -148,6 +185,17 @@ async function ensureDefaultTeacher(email, password) {
     const klass = (await all(`SELECT * FROM classes WHERE teacher_id = ?`, [teacherId]))[0];
     await run(`INSERT INTO students (name, roll_no, class_id) VALUES (?,?,?)`, ['Student One','1', klass.id]);
     await run(`INSERT INTO students (name, roll_no, class_id) VALUES (?,?,?)`, ['Student Two','2', klass.id]);
+    const defaultPeriods = [
+      ['Period 1','09:00','09:45'],
+      ['Period 2','09:50','10:35'],
+      ['Period 3','10:40','11:25'],
+      ['Period 4','11:30','12:15'],
+      ['Period 5','12:45','13:30'],
+      ['Period 6','13:35','14:20']
+    ];
+    for (const [name, st, et] of defaultPeriods) {
+      await run(`INSERT OR IGNORE INTO periods (class_id, name, start_time, end_time) VALUES (?,?,?,?)`, [klass.id, name, st, et]);
+    }
   }
 }
 
