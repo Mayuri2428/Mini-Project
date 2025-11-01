@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title>Teacher Login</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Teacher Login</h1>
+    <% if (error) { %><div class="alert"><%= error %></div><% } %>
+    <form method="post" action="/login">
+      <label>Email</label>
+      <input type="email" name="email" required placeholder="teacher@example.com">
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="pass1234">
+      <button type="submit">Login</button>
+    </form>
+    <p class="muted">Demo: teacher@example.com / pass1234</p>
+  </div>
+</body>
+</html>

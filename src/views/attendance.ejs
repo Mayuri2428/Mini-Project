@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title>Attendance - <%= klass.name %></title>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/dashboard">← Back</a>
+    <form method="post" action="/logout"><button type="submit">Logout</button></form>
+  </div>
+  <div class="container">
+    <h1>Attendance - <%= klass.name %> <span class="muted">Section <%= klass.section || '-' %></span></h1>
+
+    <form method="get" action="">
+      <label>Date</label>
+      <input type="date" name="date" value="<%= date %>">
+      <button type="submit">Load</button>
+      <% if (typeof saved !== 'undefined') { %><span class="muted">Saved</span><% } %>
+    </form>
+
+    <form method="post" action="/class/<%= klass.id %>/attendance">
+      <input type="hidden" name="date" value="<%= date %>">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% students.forEach(s => { %>
+            <tr>
+              <td><%= s.roll_no || '-' %></td>
+              <td><%= s.name %></td>
+              <td>
+                <select name="status_<%= s.id %>">
+                  <option value="present" <%= (statusMap.get(s.id) || 'present') === 'present' ? 'selected' : '' %>>Present</option>
+                  <option value="absent" <%= statusMap.get(s.id) === 'absent' ? 'selected' : '' %>>Absent</option>
+                  <option value="late" <%= statusMap.get(s.id) === 'late' ? 'selected' : '' %>>Late</option>
+                  <option value="excused" <%= statusMap.get(s.id) === 'excused' ? 'selected' : '' %>>Excused</option>
+                </select>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class="actions">
+        <button type="submit">Save Attendance</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
