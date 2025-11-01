@@ -8,7 +8,8 @@
 </head>
 <body>
   <div class="topbar">
-    <a href="/dashboard">← Back</a>
+    <div><a href="/dashboard" style="color:#063a4b;text-decoration:none">← Back</a></div>
+    <div class="brand"><%= brand %></div>
     <form method="post" action="/logout"><button type="submit">Logout</button></form>
   </div>
   <div class="container">
@@ -21,14 +22,17 @@
       <% if (typeof saved !== 'undefined') { %><span class="muted">Saved</span><% } %>
     </form>
 
-    <form method="post" action="/class/<%= klass.id %>/attendance">
+    <form method="post" action="/class/<%= klass.id %>/attendance" id="dailyForm">
       <input type="hidden" name="date" value="<%= date %>">
+      <div class="toolbar">
+        <button type="button" class="secondary" id="markAll">Mark all Present</button>
+      </div>
       <table class="table">
         <thead>
           <tr>
             <th>Roll</th>
             <th>Name</th>
-            <th>Status</th>
+            <th>Present</th>
           </tr>
         </thead>
         <tbody>
@@ -37,12 +41,7 @@
               <td><%= s.roll_no || '-' %></td>
               <td><%= s.name %></td>
               <td>
-                <select name="status_<%= s.id %>">
-                  <option value="present" <%= (statusMap.get(s.id) || 'present') === 'present' ? 'selected' : '' %>>Present</option>
-                  <option value="absent" <%= statusMap.get(s.id) === 'absent' ? 'selected' : '' %>>Absent</option>
-                  <option value="late" <%= statusMap.get(s.id) === 'late' ? 'selected' : '' %>>Late</option>
-                  <option value="excused" <%= statusMap.get(s.id) === 'excused' ? 'selected' : '' %>>Excused</option>
-                </select>
+                <input type="checkbox" name="present_<%= s.id %>" <%= (statusMap.get(s.id) || 'present') === 'present' ? 'checked' : '' %> />
               </td>
             </tr>
           <% }) %>
@@ -52,6 +51,11 @@
         <button type="submit">Save Attendance</button>
       </div>
     </form>
+    <script>
+      document.getElementById('markAll').addEventListener('click', function(){
+        document.querySelectorAll('#dailyForm input[type="checkbox"]').forEach(cb => cb.checked = true);
+      });
+    </script>
   </div>
 </body>
 </html>

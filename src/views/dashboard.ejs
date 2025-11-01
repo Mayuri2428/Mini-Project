@@ -8,8 +8,10 @@
 </head>
 <body>
   <div class="topbar">
-    <div>Welcome, <strong><%= currentUser.name %></strong></div>
-    <form method="post" action="/logout"><button type="submit">Logout</button></form>
+    <div class="brand"><%= brand %></div>
+    <div>Welcome, <strong><%= currentUser.name %></strong> &nbsp; 
+      <form style="display:inline" method="post" action="/logout"><button type="submit">Logout</button></form>
+    </div>
   </div>
   <div class="container">
     <h1>Your Classes</h1>

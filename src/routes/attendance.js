@@ -29,7 +29,8 @@ router.post('/class/:id/attendance', requireAuth, async (req, res) => {
   const students = await all(`SELECT * FROM students WHERE class_id = ?`, [classId]);
 
   for (const s of students) {
-    const value = req.body[`status_${s.id}`] || 'present';
+    const isPresent = !!req.body[`present_${s.id}`];
+    const value = isPresent ? 'present' : 'absent';
     await run(
       `INSERT INTO attendance (date, class_id, student_id, status) VALUES (?,?,?,?)
        ON CONFLICT(date, student_id) DO UPDATE SET status = excluded.status`,
