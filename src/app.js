@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import authRouter from './routes/auth.js';
 import dashboardRouter from './routes/dashboard.js';
 import attendanceRouter from './routes/attendance.js';
-import { migrate } from './db.js';
+import { migrate, ensureDefaultTeacher } from './db.js';
 
 dotenv.config();
 
@@ -70,7 +70,8 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 migrate()
-  .then(() => {
+  .then(async () => {
+    await ensureDefaultTeacher('mjsfutane21@gmail.com', 'abc@1234');
     app.listen(port, () => {
       console.log(`Attendance portal listening on http://localhost:${port}`);
     });

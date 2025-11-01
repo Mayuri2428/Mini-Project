@@ -125,6 +125,30 @@ async function seed() {
   }
 }
 
+async function ensureDefaultTeacher(email, password) {
+  if (!email || !password) return;
+  const existing = await all(`SELECT * FROM teachers WHERE email = ?`, [email]);
+  let teacherId;
+  if (existing.length === 0) {
+    const hash = await bcrypt.hash(password, 10);
+    await run(`INSERT INTO teachers (name, email, password_hash) VALUES (?,?,?)`, [
+      'Teacher', email, hash
+    ]);
+    const t = (await all(`SELECT * FROM teachers WHERE email = ?`, [email]))[0];
+    teacherId = t.id;
+  } else {
+    teacherId = existing[0].id;
+  }
+
+  const classCount = await all(`SELECT COUNT(*) as c FROM classes WHERE teacher_id = ?`, [teacherId]);
+  if (classCount[0].c === 0) {
+    await run(`INSERT INTO classes (name, section, teacher_id) VALUES (?,?,?)`, ['Class 8', 'A', teacherId]);
+    const klass = (await all(`SELECT * FROM classes WHERE teacher_id = ?`, [teacherId]))[0];
+    await run(`INSERT INTO students (name, roll_no, class_id) VALUES (?,?,?)`, ['Student One','1', klass.id]);
+    await run(`INSERT INTO students (name, roll_no, class_id) VALUES (?,?,?)`, ['Student Two','2', klass.id]);
+  }
+}
+
 const cmd = process.argv[2];
 if (cmd === 'init') {
   migrate().then(() => { console.log('DB migrated'); db.close(); }).catch(e => { console.error(e); db.close(); process.exit(1); });
@@ -132,4 +156,4 @@ if (cmd === 'init') {
   migrate().then(seed).then(() => { console.log('DB seeded'); db.close(); }).catch(e => { console.error(e); db.close(); process.exit(1); });
 }
 
-export { db, migrate, seed, all, run, dbPath };
+export { db, migrate, seed, all, run, dbPath, ensureDefaultTeacher };
