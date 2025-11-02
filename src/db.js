@@ -42,6 +42,7 @@ async function migrate() {
     password_hash TEXT NOT NULL
   );`);
 
+
   await run(`CREATE TABLE IF NOT EXISTS periods (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     class_id INTEGER NOT NULL,
