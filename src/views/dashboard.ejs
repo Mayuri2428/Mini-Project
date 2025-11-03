@@ -14,6 +14,39 @@
     </div>
   </div>
   <div class="container">
+    <h1>Dashboard</h1>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Total Classes</div>
+        <div class="value" id="totalClasses">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Students</div>
+        <div class="value" id="totalStudents">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Today's Present</div>
+        <div class="value" id="todayPresent">0</div>
+        <div class="sub" id="todayDate"></div>
+      </div>
+      <div class="card">
+        <div class="label">Today's Absent</div>
+        <div class="value" id="todayAbsent">0</div>
+        <div class="sub" id="todayOther"></div>
+      </div>
+    </div>
+
+    <div class="section grid">
+      <div class="chart-wrap">
+        <h3 style="margin-top:0">Today Overview</h3>
+        <canvas id="todayChart" height="220"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <h3 style="margin-top:0">Last 30 Days</h3>
+        <canvas id="trendChart" height="220"></canvas>
+      </div>
+    </div>
+
     <h1>Your Classes</h1>
     <% if (flash) { %>
       <div class="alert"><%= flash.message %></div>
@@ -40,15 +73,55 @@
             <span class="muted">|</span>
             <a href="/reports/class/<%= c.id %>">Class Report</a>
             <span class="muted">|</span>
+            <a href="/reports/class/<%= c.id %>/overview">Overview</a>
+            <span class="muted">|</span>
             <a href="/class/<%= c.id %>/import">Import CSV</a>
             <span class="muted">|</span>
             <a href="/class/<%= c.id %>/student/new">Add Student</a>
             <span class="muted">|</span>
             <a href="/class/<%= c.id %>/periods/manage">Manage Periods</a>
+            <span class="muted">|</span>
+            <a href="/class/<%= c.id %>/students/manage">Manage Students</a>
+            <span class="muted">|</span>
+            <a href="/class/<%= c.id %>/insights">Insights</a>
           </div>
         </li>
       <% }) %>
     </ul>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    async function fetchJSON(u){ const r = await fetch(u); return r.json(); }
+    async function loadDashboard(){
+      const totals = await fetchJSON('/api/teacher/totals');
+      document.getElementById('totalClasses').textContent = totals.classes;
+      document.getElementById('totalStudents').textContent = totals.students;
+
+      const today = await fetchJSON('/api/teacher/today');
+      document.getElementById('todayPresent').textContent = today.present || 0;
+      document.getElementById('todayAbsent').textContent = (today.absent || 0);
+      document.getElementById('todayDate').textContent = today.date ? `Date: ${today.date}` : '';
+      const other = (today.late||0) + (today.excused||0);
+      document.getElementById('todayOther').textContent = other ? `Late+Excused: ${other}` : '';
+
+      // Today doughnut
+      const tctx = document.getElementById('todayChart');
+      new Chart(tctx, {
+        type:'doughnut',
+        data:{ labels:['Present','Absent','Late','Excused'], datasets:[{ data:[today.present||0,today.absent||0,today.late||0,today.excused||0], backgroundColor:['#22c55e','#ef4444','#f59e0b','#60a5fa'] }] },
+        options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'#063a4b' } } } }
+      });
+
+      // Trend line
+      const series = await fetchJSON('/api/teacher/trend?days=30');
+      const lctx = document.getElementById('trendChart');
+      new Chart(lctx, {
+        type:'line',
+        data:{ labels: series.map(x=>x.date), datasets:[{ label:'Present %', data: series.map(x=>x.rate), borderColor:'#3aa7cc', tension:.25 }] },
+        options:{ plugins:{ legend:{ labels:{ color:'#063a4b' } } }, scales:{ y:{ suggestedMin:0, suggestedMax:100 } } }
+      });
+    }
+    loadDashboard();
+  </script>
 </body>
 </html>

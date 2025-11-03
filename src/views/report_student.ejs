@@ -39,6 +39,73 @@
         <% }) %>
       </tbody>
     </table>
+
+    <div style="margin-top:16px" class="grid">
+      <div>
+        <h3>Personal Trend (last 30 days)</h3>
+        <canvas id="trendChart" height="200"></canvas>
+      </div>
+      <div style="margin-top:16px">
+        <h3>Monthly Heatmap</h3>
+        <form id="monthForm" style="margin-bottom:8px">
+          <label>Month</label>
+          <input type="month" name="month" id="monthInput">
+          <button type="submit">Load</button>
+        </form>
+        <div id="heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+        <div class="muted" style="margin-top:6px">Legend: Present = skyblue, Absent/No record = light gray</div>
+      </div>
+    </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const sid = Number('<%= student.id %>');
+    async function fetchJSON(u){ const r = await fetch(u); return r.json(); }
+    async function loadTrend(){
+      const data = await fetchJSON(`/api/student/${sid}/trend?days=30`);
+      const ctx = document.getElementById('trendChart');
+      new Chart(ctx, {
+        type:'line',
+        data:{ labels:data.map(x=>x.date), datasets:[{ label:'Score', data:data.map(x=>x.value), borderColor:'#3aa7cc', tension:.25 }] },
+        options:{
+          plugins:{ legend:{ labels:{ color:'#063a4b' } }, tooltip:{ backgroundColor:'rgba(6,58,75,0.92)', borderColor:'#87ceeb', borderWidth:1, titleColor:'#fff', bodyColor:'#e6f6fc' } },
+          scales:{ x:{ ticks:{ color:'#063a4b' }, grid:{ color:'rgba(6,58,75,0.08)'} }, y:{ suggestedMin:0, suggestedMax:100, ticks:{ color:'#063a4b' }, grid:{ color:'rgba(6,58,75,0.08)'} } }
+        }
+      });
+    }
+    function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+    function startWeekday(year, month){ return new Date(year, month-1, 1).getDay(); }
+    async function loadHeatmap(monthStr){
+      const heat = document.getElementById('heatmap');
+      heat.innerHTML = '';
+      const y = parseInt(monthStr.slice(0,4),10); const m = parseInt(monthStr.slice(5,7),10);
+      const data = await fetchJSON(`/api/student/${sid}/heatmap?month=${encodeURIComponent(monthStr)}`);
+      const map = new Map(data.map(d=>[d.date, d.value]));
+      const pad = startWeekday(y,m);
+      for(let i=0;i<pad;i++){ const c=document.createElement('div'); c.className='muted'; c.innerHTML=''; heat.appendChild(c); }
+      const dim = daysInMonth(y,m);
+      for(let d=1; d<=dim; d++){
+        const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const val = map.get(ds) || 0;
+        const cell = document.createElement('div');
+        cell.style.height='28px';
+        cell.style.border='1px solid var(--border)';
+        cell.style.background = val ? 'var(--primary)' : '#f3f4f6';
+        cell.style.borderRadius='6px';
+        cell.title = ds + (val?' • Present':' • Absent');
+        heat.appendChild(cell);
+      }
+    }
+    (function init(){
+      // default month = current
+      const mi = document.getElementById('monthInput');
+      const now = new Date();
+      const def = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      mi.value = def;
+      document.getElementById('monthForm').addEventListener('submit', (e)=>{ e.preventDefault(); loadHeatmap(mi.value); });
+      loadTrend();
+      loadHeatmap(def);
+    })();
+  </script>
 </body>
 </html>

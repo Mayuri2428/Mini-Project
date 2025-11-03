@@ -18,3 +18,10 @@ button:hover{filter:brightness(.98)}
 .title{font-weight:700}
 .actions a{text-decoration:none;color:#0f5f8a;font-weight:600}
 .toolbar{display:flex;gap:8px;margin:8px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.card .label{color:var(--muted);font-size:12px}
+.card .value{font-size:24px;font-weight:800;color:#063a4b}
+.card .sub{color:#0f5f8a;font-weight:600;font-size:12px}
+.section{margin:20px 0}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}

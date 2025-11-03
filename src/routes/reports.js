@@ -114,3 +114,36 @@ router.get('/reports/student/:id/periods', requireAuth, async (req, res) => {
   }
   res.render('report_student_periods', { student, rows, from: from || '', to: to || '' });
 });
+
+// Class attendance overview (daily summary rows)
+router.get('/reports/class/:id/overview', requireAuth, async (req, res) => {
+  const classId = parseInt(req.params.id, 10);
+  const klass = (await all(`SELECT * FROM classes WHERE id = ? AND teacher_id = ?`, [classId, req.session.user.id]))[0];
+  if (!klass) return res.status(404).send('Not found');
+  const { from, to, format } = req.query;
+  const rows = await all(`
+    SELECT date,
+      SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present,
+      SUM(CASE WHEN status='absent' THEN 1 ELSE 0 END) as absent,
+      SUM(CASE WHEN status='late' THEN 1 ELSE 0 END) as late,
+      SUM(CASE WHEN status='excused' THEN 1 ELSE 0 END) as excused,
+      COUNT(id) as total
+    FROM attendance
+    WHERE class_id = ?
+      AND (? IS NULL OR date >= ?)
+      AND (? IS NULL OR date <= ?)
+    GROUP BY date
+    ORDER BY date DESC
+  `, [classId, from || null, from || null, to || null, to || null]);
+
+  const enhanced = rows.map(r => ({
+    ...r,
+    rate: r.total ? Math.round((r.present / r.total) * 100) : 0
+  }));
+
+  if (format === 'csv') {
+    const headers = ['date','present','absent','late','excused','total','rate'];
+    return sendCsv(res, `class-${classId}-overview.csv`, headers, enhanced);
+  }
+  res.render('overview_class', { klass, rows: enhanced, from: from || '', to: to || '' });
+});

@@ -12,6 +12,8 @@ import reportsRouter from './routes/reports.js';
 import importRouter from './routes/import.js';
 import periodsRouter from './routes/periods.js';
 import manageRouter from './routes/manage.js';
+import apiRouter from './routes/api.js';
+import insightsRouter from './routes/insights.js';
 
 dotenv.config();
 
@@ -64,6 +66,8 @@ app.use('/', reportsRouter);
 app.use('/', importRouter);
 app.use('/', periodsRouter);
 app.use('/', manageRouter);
+app.use('/', apiRouter);
+app.use('/', insightsRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });
