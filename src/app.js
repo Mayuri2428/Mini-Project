@@ -16,6 +16,8 @@ import apiRouter from './routes/api.js';
 import insightsRouter from './routes/insights.js';
 import dailyAttendanceRouter from './routes/daily-attendance.js';
 import emailReportsRouter from './routes/email-reports.js';
+import bulkImportRouter from './routes/bulk-import.js';
+import analyticsRouter from './routes/analytics.js';
 
 dotenv.config();
 
@@ -75,6 +77,8 @@ app.use('/', apiRouter);
 app.use('/', insightsRouter);
 app.use('/', dailyAttendanceRouter);
 app.use('/', emailReportsRouter);
+app.use('/', bulkImportRouter);
+app.use('/', analyticsRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });
@@ -99,6 +103,11 @@ app.use((err, req, res, next) => {
 migrate()
   .then(async () => {
     await ensureDefaultTeacher('mjsfutane21@gmail.com', 'abc@1234');
+    
+    // Initialize audit table
+    const { initializeAuditTable } = await import('./middleware/audit.js');
+    await initializeAuditTable();
+    
     console.log('Database initialized successfully');
   })
   .catch((e) => {
