@@ -1,0 +1,280 @@
+{
+  "folders": [
+    {
+      "name": "🎓 AttendanceMS",
+      "path": ".."
+    }
+  ],
+  "settings": {
+    // Editor settings
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+      "source.organizeImports": true
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [80, 120],
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    
+    // File associations
+    "files.associations": {
+      "*.ejs": "html",
+      "*.env.example": "properties",
+      "Dockerfile.*": "dockerfile",
+      "docker-compose*.yml": "yaml"
+    },
+    
+    // Emmet support
+    "emmet.includeLanguages": {
+      "ejs": "html",
+      "javascript": "javascriptreact"
+    },
+    
+    // File exclusions for better performance
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/logs": true,
+      "**/backups": true,
+      "**/coverage": true,
+      "**/.nyc_output": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.git": false
+    },
+    
+    // Search exclusions
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/logs": true,
+      "**/backups": true,
+      "**/coverage": true,
+      "**/.git": true,
+      "**/dist": true,
+      "**/build": true
+    },
+    
+    // Language-specific formatting
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[css]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.wordWrap": "on"
+    },
+    "[yaml]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    
+    // ESLint configuration
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact"
+    ],
+    "eslint.workingDirectories": ["../"],
+    
+    // Git settings
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "git.decorations.enabled": true,
+    
+    // Terminal settings
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.cwd": "../",
+    
+    // Explorer settings
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "explorer.compactFolders": false,
+    "explorer.sortOrder": "type",
+    
+    // Breadcrumbs
+    "breadcrumbs.enabled": true,
+    "breadcrumbs.showFiles": true,
+    "breadcrumbs.showSymbols": true,
+    
+    // IntelliSense
+    "typescript.suggest.autoImports": true,
+    "javascript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    
+    // Debugging
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.inlineValues": "auto",
+    "debug.showBreakpointsInOverviewRuler": true,
+    
+    // Workbench appearance
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.closeOnFileDelete": true,
+    "workbench.startupEditor": "readme",
+    
+    // Problems panel
+    "problems.decorations.enabled": true,
+    "problems.showCurrentInStatus": true,
+    
+    // Extensions settings
+    "extensions.autoUpdate": true,
+    "extensions.ignoreRecommendations": false,
+    
+    // Todo Tree configuration
+    "todo-tree.general.tags": [
+      "BUG",
+      "HACK",
+      "FIXME",
+      "TODO",
+      "XXX",
+      "NOTE",
+      "REVIEW",
+      "OPTIMIZE",
+      "[ ]",
+      "[x]"
+    ],
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\*|\\+))\\s*($TAGS)",
+    "todo-tree.highlights.defaultHighlight": {
+      "icon": "alert",
+      "type": "tag",
+      "foreground": "red",
+      "background": "white",
+      "opacity": 50,
+      "iconColour": "blue"
+    },
+    
+    // Better Comments
+    "better-comments.multilineComments": true,
+    "better-comments.highlightPlainText": false,
+    
+    // GitLens settings
+    "gitlens.codeLens.enabled": true,
+    "gitlens.currentLine.enabled": true,
+    "gitlens.hovers.enabled": true,
+    
+    // Auto Close Tag
+    "auto-close-tag.activationOnLanguage": [
+      "xml",
+      "php",
+      "blade",
+      "ejs",
+      "jinja",
+      "javascript",
+      "typescript",
+      "javascriptreact",
+      "typescriptreact",
+      "plaintext",
+      "markdown",
+      "vue",
+      "liquid",
+      "erb",
+      "lang-cfml",
+      "cfml",
+      "HTML (EEx)",
+      "HTML (Eex)",
+      "plist"
+    ],
+    
+    // Path Intellisense
+    "path-intellisense.mappings": {
+      "/": "${workspaceRoot}",
+      "src": "${workspaceRoot}/src",
+      "public": "${workspaceRoot}/public",
+      "views": "${workspaceRoot}/src/views"
+    },
+    
+    // REST Client
+    "rest-client.environmentVariables": {
+      "local": {
+        "baseUrl": "http://localhost:3000",
+        "apiKey": "your-api-key"
+      },
+      "staging": {
+        "baseUrl": "https://staging.attendancems.com",
+        "apiKey": "staging-api-key"
+      },
+      "production": {
+        "baseUrl": "https://attendancems.com",
+        "apiKey": "production-api-key"
+      }
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "github.vscode-pull-request-github",
+      "github.copilot",
+      "eamodio.gitlens",
+      "ms-vscode.vscode-docker",
+      "ms-vscode.vscode-node-azure-pack",
+      "gruntfuggly.todo-tree",
+      "aaron-bond.better-comments",
+      "christian-kohler.path-intellisense",
+      "formulahendry.auto-close-tag",
+      "formulahendry.auto-rename-tag",
+      "pkief.material-icon-theme",
+      "streetsidesoftware.code-spell-checker",
+      "humao.rest-client",
+      "ms-vscode.vscode-json",
+      "redhat.vscode-yaml",
+      "mikestead.dotenv",
+      "alexcvzz.vscode-sqlite"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "🚀 Launch AttendanceMS",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/src/app.js",
+        "env": {
+          "NODE_ENV": "development"
+        },
+        "console": "integratedTerminal",
+        "restart": true
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "🚀 Start Development",
+        "type": "npm",
+        "script": "dev",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "🧪 Run Tests",
+        "type": "npm",
+        "script": "test",
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        }
+      }
+    ]
+  }
+}

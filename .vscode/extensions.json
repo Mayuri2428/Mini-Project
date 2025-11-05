@@ -1,0 +1,76 @@
+{
+  "recommendations": [
+    // Essential Node.js development
+    "ms-vscode.vscode-node-azure-pack",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-npm-script",
+    
+    // Code formatting and linting
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    
+    // Git and GitHub integration
+    "github.vscode-pull-request-github",
+    "github.copilot",
+    "eamodio.gitlens",
+    
+    // Docker support
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.vscode-docker",
+    
+    // Web development
+    "bradlc.vscode-tailwindcss",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "zignd.html-css-class-completion",
+    
+    // File support
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-markdown",
+    
+    // Productivity
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    "ms-vscode.vscode-color-info",
+    
+    // Database
+    "ms-mssql.mssql",
+    "alexcvzz.vscode-sqlite",
+    
+    // Testing
+    "ms-vscode.vscode-test-adapter-api",
+    "hbenl.vscode-test-explorer",
+    
+    // API development
+    "humao.rest-client",
+    "42crunch.vscode-openapi",
+    
+    // Themes and icons (optional)
+    "pkief.material-icon-theme",
+    "zhuangtongfa.material-theme",
+    
+    // Live server for frontend development
+    "ritwickdey.liveserver",
+    
+    // Environment files
+    "mikestead.dotenv",
+    
+    // Bracket pair colorizer
+    "coenraads.bracket-pair-colorizer-2",
+    
+    // Auto close tag
+    "formulahendry.auto-close-tag",
+    
+    // Indent rainbow
+    "oderwat.indent-rainbow",
+    
+    // Import cost
+    "wix.vscode-import-cost"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify"
+  ]
+}
