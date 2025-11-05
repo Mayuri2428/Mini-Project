@@ -88,16 +88,32 @@ app.use((err, req, res, next) => {
   res.status(500).send('Internal Server Error');
 });
 
-const port = process.env.PORT || 3000;
-migrate()
-  .then(async () => {
+// Initialize database
+let dbInitialized = false;
+async function initDB() {
+  if (!dbInitialized) {
+    await migrate();
     await ensureDefaultTeacher('mjsfutane21@gmail.com', 'abc@1234');
-    console.log('Default teacher ensured: mjsfutane21@gmail.com');
-    app.listen(port, () => {
-      console.log(`Attendance portal listening on http://localhost:${port}`);
-    });
-  })
-  .catch((e) => {
-    console.error('Failed to run migrations:', e);
-    process.exit(1);
-  });
+    dbInitialized = true;
+  }
+}
+
+// Middleware to ensure DB is initialized
+app.use(async (req, res, next) => {
+  try {
+    await initDB();
+    next();
+  } catch (error) {
+    console.error('DB initialization error:', error);
+    res.status(500).send('Database initialization failed');
+  }
+});
+
+const port = process.env.PORT || 3000;
+
+// Start server
+app.listen(port, () => {
+  console.log(`Attendance portal listening on port ${port}`);
+});
+
+export default app;
