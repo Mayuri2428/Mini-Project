@@ -6,6 +6,28 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+
+// Professional middleware imports
+import { 
+  securityHeaders, 
+  corsOptions, 
+  compressionMiddleware, 
+  apiLimiter,
+  authLimiter,
+  generateCSRFToken,
+  sessionSecurity
+} from './middleware/security.js';
+import { 
+  errorHandler, 
+  notFoundHandler, 
+  setupGlobalErrorHandlers, 
+  requestLogger, 
+  performanceMonitor,
+  healthCheck
+} from './middleware/errorHandler.js';
+import { warmUpCache, cacheMiddleware } from './middleware/cache.js';
+import { setupApiDocs } from './middleware/apiDocs.js';
+import { dbManager } from './database/connection.js';
 import authRouter from './routes/auth.js';
 import dashboardRouter from './routes/dashboard.js';
 import attendanceRouter from './routes/attendance.js';
@@ -27,6 +49,7 @@ import notificationsRouter from './routes/notifications.js';
 import teacherDashboardRouter from './routes/teacher-dashboard.js';
 import teacherApiRouter from './routes/teacher-api.js';
 import helpRouter from './routes/help.js';
+import enhancedReportsRouter from './routes/enhanced-reports.js';
 
 dotenv.config();
 
@@ -39,7 +62,19 @@ const io = new Server(server);
 
 const SQLiteStore = SQLiteStoreFactory(session);
 
+// Setup global error handlers
+setupGlobalErrorHandlers();
+
+// Trust proxy for production deployments
 app.set('trust proxy', 1);
+
+// Security middleware
+app.use(securityHeaders);
+app.use(compressionMiddleware);
+
+// CORS configuration
+import cors from 'cors';
+app.use(cors(corsOptions));
 
 // GitHub Codespace compatibility
 if (process.env.CODESPACE_NAME) {
@@ -50,32 +85,34 @@ if (process.env.CODESPACE_NAME) {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Request logging (only in development)
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    const start = Date.now();
-    res.on('finish', () => {
-      const ms = Date.now() - start;
-      console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} ${ms}ms`);
-    });
-    next();
-  });
-}
+// Professional logging and monitoring
+app.use(requestLogger);
+app.use(performanceMonitor);
+
+// Rate limiting
+app.use('/api/', apiLimiter);
+app.use('/login', authLimiter);
+app.use('/register', authLimiter);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 
+// Enhanced session configuration
 app.use(
   session({
     store: new SQLiteStore({ db: 'sessions.db', dir: path.join(__dirname, '..', 'data') }),
-    secret: process.env.SESSION_SECRET || 'dev_secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 6 }
+    ...sessionSecurity,
+    cookie: {
+      ...sessionSecurity.cookie,
+      maxAge: 1000 * 60 * 60 * 6 // 6 hours
+    }
   })
 );
+
+// CSRF protection
+app.use(generateCSRFToken);
 
 app.use((req, res, next) => {
   res.locals.brand = 'Government College Of Engineering Aurangabad Chhatrapati Sambhajinagar';
@@ -105,6 +142,7 @@ app.use('/', notificationsRouter);
 app.use('/', teacherDashboardRouter);
 app.use('/', teacherApiRouter);
 app.use('/', helpRouter);
+app.use('/', enhancedReportsRouter);
 
 // Make io available to routes
 app.set('io', io);
@@ -123,9 +161,14 @@ io.on('connection', (socket) => {
   });
 });
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ ok: true });
-});
+// Enhanced health check endpoint
+app.get('/health', healthCheck);
+
+// API documentation
+setupApiDocs(app);
+
+// Cache middleware for API routes
+app.use('/api/', cacheMiddleware.api);
 
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
@@ -137,17 +180,21 @@ app.get('/home', (req, res) => {
   res.render('home');
 });
 
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).send('Internal Server Error');
-});
+// Professional error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-// Initialize database once on startup
-migrate()
-  .then(async () => {
+// Enhanced database initialization
+const initializeApplication = async () => {
+  try {
+    // Connect to database
+    await dbManager.connect();
+    
+    // Run migrations
+    await migrate();
     await ensureDefaultTeacher('mjsfutane21@gmail.com', 'abc@1234');
     
-    // Initialize audit table (optional)
+    // Initialize optional features
     try {
       const { initializeAuditTable } = await import('./middleware/audit.js');
       await initializeAuditTable();
@@ -155,7 +202,6 @@ migrate()
       console.log('Audit table initialization skipped (optional feature)');
     }
     
-    // Initialize notification tables (optional)
     try {
       const { createNotificationTables } = await import('./db-notifications.js');
       await createNotificationTables();
@@ -167,12 +213,28 @@ migrate()
       console.log('Notification system initialization skipped (optional feature)');
     }
     
-    console.log('Database initialized successfully');
-  })
-  .catch((e) => {
-    console.error('Failed to initialize database:', e);
+    // Warm up cache
+    await warmUpCache({ all });
+    
+    console.log('✅ Application initialized successfully');
+    
+    // Database optimization (run periodically)
+    setInterval(async () => {
+      try {
+        await dbManager.optimize();
+      } catch (error) {
+        console.error('Database optimization failed:', error);
+      }
+    }, 24 * 60 * 60 * 1000); // Daily
+    
+  } catch (error) {
+    console.error('❌ Application initialization failed:', error);
     process.exit(1);
-  });
+  }
+};
+
+// Initialize application
+initializeApplication();
 
 const port = process.env.PORT || process.env.CODESPACE_NAME ? 8080 : 3000;
 

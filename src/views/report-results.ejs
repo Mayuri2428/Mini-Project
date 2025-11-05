@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> - AttendanceMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .report-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .report-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .summary-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-color: #e9ecef;
+        }
+
+        .attendance-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-excellent { background: #d4edda; color: #155724; }
+        .badge-good { background: #d1ecf1; color: #0c5460; }
+        .badge-average { background: #fff3cd; color: #856404; }
+        .badge-poor { background: #f8d7da; color: #721c24; }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action {
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .metadata-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .report-card {
+                padding: 20px;
+            }
+            
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0,0,0,0.1);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>AttendanceMS
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/reports">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Reports
+                </a>
+                <a class="nav-link" href="/dashboard">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-chart-line me-3"></i><%= pageTitle %></h1>
+                    <p class="mb-0">
+                        <strong><%= reportData.metadata.class.name %></strong>
+                        <% if (reportData.metadata.class.section) { %> - Section <%= reportData.metadata.class.section %><% } %>
+                        <% if (reportData.metadata.class.department) { %> | <%= reportData.metadata.class.department %><% } %>
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-light btn-action" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i>Print
+                        </button>
+                        <button class="btn btn-light btn-action" onclick="exportReport()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Metadata -->
+        <div class="report-card">
+            <div class="metadata-info">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Date Range:</strong><br>
+                        <%= new Date(reportData.metadata.dateRange.from).toLocaleDateString() %> - 
+                        <%= new Date(reportData.metadata.dateRange.to).toLocaleDateString() %>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Generated:</strong><br>
+                        <%= new Date(reportData.metadata.generatedAt).toLocaleString() %>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Generated By:</strong><br>
+                        <%= reportData.metadata.generatedBy %>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Report Type:</strong><br>
+                        <%= reportData.metadata.reportType.replace('_', ' ').toUpperCase() %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <% if (reportData.summary) { %>
+        <div class="report-card">
+            <h3 class="mb-4"><i class="fas fa-chart-pie me-2"></i>Summary</h3>
+            <div class="row">
+                <% Object.entries(reportData.summary).forEach(([key, value]) => { %>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="summary-card">
+                            <div class="summary-number"><%= value %></div>
+                            <div class="summary-label"><%= key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) %></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Charts Section -->
+        <% if (reportData.type === 'attendance_trends' || reportData.type === 'daily_summary') { %>
+        <div class="report-card">
+            <h3 class="mb-4"><i class="fas fa-chart-area me-2"></i>Visual Analysis</h3>
+            <div class="chart-container">
+                <canvas id="attendanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Data Table -->
+        <div class="report-card">
+            <h3 class="mb-4"><i class="fas fa-table me-2"></i>Detailed Data</h3>
+            <div class="table-responsive">
+                <div class="data-table">
+                    <% if (reportData.type === 'daily_summary') { %>
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Session</th>
+                                    <th>Total Students</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Late</th>
+                                    <th>Excused</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% reportData.data.forEach(row => { %>
+                                    <tr>
+                                        <td><%= new Date(row.date).toLocaleDateString() %></td>
+                                        <td><%= row.session_time || 'All Day' %></td>
+                                        <td><%= row.total_students %></td>
+                                        <td><span class="badge bg-success"><%= row.present_count %></span></td>
+                                        <td><span class="badge bg-danger"><%= row.absent_count %></span></td>
+                                        <td><span class="badge bg-warning"><%= row.late_count %></span></td>
+                                        <td><span class="badge bg-info"><%= row.excused_count %></span></td>
+                                        <td>
+                                            <span class="attendance-badge <%= getAttendanceBadgeClass(row.attendance_percentage) %>">
+                                                <%= row.attendance_percentage %>%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } else if (reportData.type === 'student_wise') { %>
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Name</th>
+                                    <th>Year</th>
+                                    <th>Branch</th>
+                                    <th>Total Sessions</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Late</th>
+                                    <th>Excused</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% reportData.data.forEach(row => { %>
+                                    <tr>
+                                        <td><strong><%= row.roll_no %></strong></td>
+                                        <td><%= row.name %></td>
+                                        <td><%= row.academic_year || '-' %></td>
+                                        <td><%= row.branch || '-' %></td>
+                                        <td><%= row.total_sessions %></td>
+                                        <td><span class="badge bg-success"><%= row.present_sessions %></span></td>
+                                        <td><span class="badge bg-danger"><%= row.absent_sessions %></span></td>
+                                        <td><span class="badge bg-warning"><%= row.late_sessions %></span></td>
+                                        <td><span class="badge bg-info"><%= row.excused_sessions %></span></td>
+                                        <td>
+                                            <span class="attendance-badge <%= getAttendanceBadgeClass(row.attendance_percentage) %>">
+                                                <%= row.attendance_percentage || 0 %>%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } else if (reportData.type === 'session_wise') { %>
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Session Time</th>
+                                    <th>Total Days</th>
+                                    <th>Total Records</th>
+                                    <th>Present Count</th>
+                                    <th>Absent Count</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% reportData.data.forEach(row => { %>
+                                    <tr>
+                                        <td><strong><%= row.session_time %></strong></td>
+                                        <td><%= row.total_days %></td>
+                                        <td><%= row.total_records %></td>
+                                        <td><span class="badge bg-success"><%= row.present_count %></span></td>
+                                        <td><span class="badge bg-danger"><%= row.absent_count %></span></td>
+                                        <td>
+                                            <span class="attendance-badge <%= getAttendanceBadgeClass(row.attendance_percentage) %>">
+                                                <%= row.attendance_percentage %>%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } else { %>
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <% if (reportData.data.length > 0) { %>
+                                        <% Object.keys(reportData.data[0]).forEach(key => { %>
+                                            <th><%= key.replace(/_/g, ' ').toUpperCase() %></th>
+                                        <% }) %>
+                                    <% } %>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% reportData.data.forEach(row => { %>
+                                    <tr>
+                                        <% Object.values(row).forEach(value => { %>
+                                            <td><%= value %></td>
+                                        <% }) %>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Data Message -->
+        <% if (!reportData.data || reportData.data.length === 0) { %>
+        <div class="report-card text-center">
+            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+            <h4>No Data Found</h4>
+            <p class="text-muted">No attendance data found for the selected criteria. Try adjusting your filters or date range.</p>
+            <a href="/reports" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper function for attendance badge classes
+        function getAttendanceBadgeClass(percentage) {
+            if (percentage >= 90) return 'badge-excellent';
+            if (percentage >= 80) return 'badge-good';
+            if (percentage >= 70) return 'badge-average';
+            return 'badge-poor';
+        }
+
+        // Generate charts for trend data
+        <% if (reportData.type === 'attendance_trends' || reportData.type === 'daily_summary') { %>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const data = <%- JSON.stringify(reportData.data) %>;
+            
+            const labels = data.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const attendanceData = data.map(item => item.attendance_percentage);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Attendance Percentage',
+                        data: attendanceData,
+                        borderColor: 'rgb(102, 126, 234)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Attendance Trend Over Time'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        <% } %>
+
+        // Export functionality
+        function exportReport() {
+            const reportData = <%- JSON.stringify(reportData) %>;
+            const csvContent = generateCSV(reportData);
+            downloadCSV(csvContent, `${reportData.type}_report_${Date.now()}.csv`);
+        }
+
+        function generateCSV(data) {
+            if (!data.data || data.data.length === 0) return '';
+            
+            const headers = Object.keys(data.data[0]);
+            const csvRows = [headers.join(',')];
+            
+            data.data.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    return typeof value === 'string' ? `"${value}"` : value;
+                });
+                csvRows.push(values.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+
+    <%
+    function getAttendanceBadgeClass(percentage) {
+        if (percentage >= 90) return 'badge-excellent';
+        if (percentage >= 80) return 'badge-good';
+        if (percentage >= 70) return 'badge-average';
+        return 'badge-poor';
+    }
+    %>
+</body>
+</html>
