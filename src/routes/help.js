@@ -7,91 +7,91 @@ function requireAuth(req, res, next) {
   next();
 }
 
-// Main help page
+// Help main page
 router.get('/help', requireAuth, (req, res) => {
   res.render('help/index', {
-    pageTitle: 'Help Center',
-    user: req.session.user
+    title: 'Help Center',
+    currentPage: 'help'
   });
 });
 
 // Getting Started
 router.get('/help/getting-started', requireAuth, (req, res) => {
   res.render('help/getting-started', {
-    pageTitle: 'Getting Started',
-    user: req.session.user
+    title: 'Getting Started - Help Center',
+    currentPage: 'help'
   });
 });
 
 // User Roles & Access
 router.get('/help/roles', requireAuth, (req, res) => {
   res.render('help/roles', {
-    pageTitle: 'User Roles & Access',
-    user: req.session.user
+    title: 'User Roles & Access - Help Center',
+    currentPage: 'help'
   });
 });
 
 // How-To Guides
 router.get('/help/how-to', requireAuth, (req, res) => {
   res.render('help/how-to', {
-    pageTitle: 'How-To Guides',
-    user: req.session.user
+    title: 'How-To Guides - Help Center',
+    currentPage: 'help'
   });
 });
 
 // FAQs
 router.get('/help/faq', requireAuth, (req, res) => {
   res.render('help/faq', {
-    pageTitle: 'Frequently Asked Questions',
-    user: req.session.user
+    title: 'Frequently Asked Questions - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Troubleshooting
 router.get('/help/troubleshooting', requireAuth, (req, res) => {
   res.render('help/troubleshooting', {
-    pageTitle: 'Troubleshooting',
-    user: req.session.user
+    title: 'Troubleshooting - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Video Tutorials
 router.get('/help/videos', requireAuth, (req, res) => {
   res.render('help/videos', {
-    pageTitle: 'Video Tutorials',
-    user: req.session.user
+    title: 'Video Tutorials - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Contact Support
 router.get('/help/contact', requireAuth, (req, res) => {
   res.render('help/contact', {
-    pageTitle: 'Contact Support',
-    user: req.session.user
+    title: 'Contact Support - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Release Notes
 router.get('/help/release-notes', requireAuth, (req, res) => {
   res.render('help/release-notes', {
-    pageTitle: 'Release Notes',
-    user: req.session.user
+    title: 'Release Notes - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Keyboard Shortcuts
 router.get('/help/shortcuts', requireAuth, (req, res) => {
   res.render('help/shortcuts', {
-    pageTitle: 'Keyboard Shortcuts',
-    user: req.session.user
+    title: 'Keyboard Shortcuts - Help Center',
+    currentPage: 'help'
   });
 });
 
 // Privacy Policy
 router.get('/help/privacy', requireAuth, (req, res) => {
   res.render('help/privacy', {
-    pageTitle: 'Privacy & Data Policy',
-    user: req.session.user
+    title: 'Privacy & Data Policy - Help Center',
+    currentPage: 'help'
   });
 });
 

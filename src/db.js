@@ -197,6 +197,29 @@ async function migrate() {
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
   );`);
 
+  // Insert default subjects if none exist
+  const subjectCount = await get(`SELECT COUNT(*) as count FROM subjects`);
+  if (subjectCount.count === 0) {
+    // Get first teacher and class for default subjects
+    const firstTeacher = await get(`SELECT id FROM teachers LIMIT 1`);
+    const firstClass = await get(`SELECT id FROM classes LIMIT 1`);
+    
+    if (firstTeacher && firstClass) {
+      const defaultSubjects = [
+        { name: 'Mathematics', code: 'MATH' },
+        { name: 'English', code: 'ENG' },
+        { name: 'Science', code: 'SCI' },
+        { name: 'Social Studies', code: 'SS' },
+        { name: 'Computer Science', code: 'CS' }
+      ];
+
+      for (const subject of defaultSubjects) {
+        await run(`INSERT INTO subjects (name, code, class_id, teacher_id) VALUES (?, ?, ?, ?)`, 
+          [subject.name, subject.code, firstClass.id, firstTeacher.id]);
+      }
+    }
+  }
+
   await run(`CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -251,6 +274,50 @@ async function migrate() {
     sent_at TEXT,
     error TEXT,
     FOREIGN KEY (attendance_id) REFERENCES attendance(id) ON DELETE CASCADE
+  );`);
+
+  // Notifications service log table
+  await run(`CREATE TABLE IF NOT EXISTS notifications_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    recipient TEXT NOT NULL,
+    content TEXT NOT NULL,
+    student_name TEXT,
+    status TEXT NOT NULL,
+    error_message TEXT,
+    created_at TEXT NOT NULL
+  );`);
+
+  // Notification settings table
+  await run(`CREATE TABLE IF NOT EXISTS notification_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    teacher_id INTEGER NOT NULL,
+    absence_notifications BOOLEAN DEFAULT 1,
+    low_attendance_alerts BOOLEAN DEFAULT 1,
+    weekly_reports BOOLEAN DEFAULT 1,
+    monthly_reports BOOLEAN DEFAULT 1,
+    low_attendance_threshold INTEGER DEFAULT 75,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+  );`);
+
+  // Alerts table for dashboard notifications
+  await run(`CREATE TABLE IF NOT EXISTS alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL CHECK (type IN ('success', 'info', 'warning', 'error', 'system')),
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    teacher_id INTEGER,
+    student_id INTEGER,
+    class_id INTEGER,
+    is_read BOOLEAN DEFAULT 0,
+    read_at TEXT,
+    expires_at TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
   );`);
 }
 

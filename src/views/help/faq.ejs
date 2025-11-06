@@ -3,520 +3,395 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= pageTitle %> - AttendanceMS</title>
+  <title><%= title %> - Attendance Management System</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .help-header {
-      background: var(--primary-gradient);
-      color: white;
-      padding: 3rem 0 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .faq-section {
-      background: white;
-      border-radius: 15px;
-      padding: 2rem;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-
-    .accordion-button {
-      background: #f8f9fa;
-      border: none;
-      font-weight: 600;
-      padding: 1.5rem;
-    }
-
-    .accordion-button:not(.collapsed) {
-      background: var(--primary-gradient);
-      color: white;
-    }
-
-    .accordion-button:focus {
-      box-shadow: none;
-      border: none;
-    }
-
-    .accordion-item {
-      border: 1px solid #e9ecef;
-      border-radius: 10px !important;
-      margin-bottom: 1rem;
-    }
-
-    .accordion-body {
-      padding: 1.5rem;
-      line-height: 1.6;
-    }
-
-    .search-faq {
-      background: white;
-      border-radius: 15px;
-      padding: 2rem;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-
-    .category-tabs .nav-link {
-      border-radius: 10px;
-      margin-right: 0.5rem;
-      font-weight: 600;
-    }
-
-    .category-tabs .nav-link.active {
-      background: var(--primary-gradient);
-      border-color: transparent;
-    }
-
-    .back-nav {
-      position: fixed;
-      top: 2rem;
-      right: 2rem;
-      z-index: 1000;
-    }
-
-    @media (max-width: 768px) {
-      .back-nav {
-        position: relative;
-        top: auto;
-        right: auto;
-        margin-bottom: 1rem;
-      }
-    }
+    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .navbar-brand { font-weight: 700; font-size: 1.5rem; }
+    .help-content { background: white; border-radius: 15px; padding: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 30px; }
+    .faq-category { margin-bottom: 40px; }
+    .faq-item { border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 10px; }
+    .faq-question { background: #f8f9fa; padding: 20px; cursor: pointer; border-radius: 8px 8px 0 0; transition: background-color 0.3s; }
+    .faq-question:hover { background: #e9ecef; }
+    .faq-answer { padding: 20px; display: none; border-top: 1px solid #dee2e6; }
+    .faq-answer.show { display: block; }
+    .search-box { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 30px; }
   </style>
 </head>
 <body>
   <!-- Navigation -->
-  <div class="back-nav">
-    <a href="/help" class="btn btn-outline-primary me-2">
-      <i class="fas fa-arrow-left me-2"></i>Back to Help
-    </a>
-    <a href="/dashboard" class="btn btn-primary">
-      <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-    </a>
-  </div>
-
-  <!-- Header -->
-  <div class="help-header">
-    <div class="container">
-      <h1><i class="fas fa-question-circle me-3"></i>Frequently Asked Questions</h1>
-      <p class="lead">Find quick answers to common questions about AttendanceMS</p>
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- Search -->
-    <div class="search-faq">
-      <div class="input-group">
-        <span class="input-group-text bg-transparent border-0">
-          <i class="fas fa-search text-muted"></i>
-        </span>
-        <input type="text" class="form-control border-0" placeholder="Search FAQs..." id="faqSearch">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/dashboard">
+        <i class="fas fa-graduation-cap me-2"></i>Attendance MS
+      </a>
+      <div class="navbar-nav ms-auto">
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i><%= currentUser.name %>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
+            <li><a class="dropdown-item" href="/help"><i class="fas fa-question-circle me-2"></i>Help Center</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><form method="post" action="/logout" class="d-inline"><button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i>Logout</button></form></li>
+          </ul>
+        </div>
       </div>
     </div>
+  </nav>
 
-    <!-- Category Tabs -->
-    <ul class="nav nav-tabs category-tabs mb-4" id="categoryTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button">
-          <i class="fas fa-info-circle me-2"></i>General
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button">
-          <i class="fas fa-calendar-check me-2"></i>Attendance
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical" type="button">
-          <i class="fas fa-cog me-2"></i>Technical
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button">
-          <i class="fas fa-user me-2"></i>Account
-        </button>
-      </li>
-    </ul>
+  <div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/help">Help Center</a></li>
+        <li class="breadcrumb-item active">Frequently Asked Questions</li>
+      </ol>
+    </nav>
 
-    <!-- FAQ Content -->
-    <div class="tab-content" id="categoryTabsContent">
-      <!-- General FAQs -->
-      <div class="tab-pane fade show active" id="general" role="tabpanel">
-        <div class="faq-section">
-          <div class="accordion" id="generalAccordion">
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#general1">
-                  What is AttendanceMS and how does it work?
-                </button>
-              </h2>
-              <div id="general1" class="accordion-collapse collapse show" data-bs-parent="#generalAccordion">
-                <div class="accordion-body">
-                  AttendanceMS is a web-based attendance management system designed for educational institutions. It allows teachers to:
-                  <ul>
-                    <li>Mark student attendance quickly and efficiently</li>
-                    <li>Generate detailed attendance reports</li>
-                    <li>Send automated notifications to parents</li>
-                    <li>Track attendance patterns and analytics</li>
-                  </ul>
-                  The system works entirely through your web browser - no software installation required.
-                </div>
-              </div>
+    <div class="help-content">
+      <h1 class="mb-4"><i class="fas fa-question-circle me-3 text-primary"></i>Frequently Asked Questions</h1>
+      
+      <p class="lead mb-4">Find quick answers to the most common questions about the attendance management system.</p>
+
+      <!-- Search Box -->
+      <div class="search-box">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" id="faqSearch" placeholder="Search FAQs...">
+        </div>
+        <small class="text-muted">Type keywords to quickly find relevant questions</small>
+      </div>
+
+      <!-- Getting Started FAQs -->
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-rocket me-2 text-success"></i>Getting Started</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">How do I log in to the system?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>To log in to the attendance management system:</p>
+            <ol>
+              <li>Go to the login page (usually the homepage)</li>
+              <li>Enter your email address and password provided by your administrator</li>
+              <li>Click "Login" to access your dashboard</li>
+            </ol>
+            <p>If you don't have login credentials, contact your school administrator to get an account created.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general2">
-                  Who can use AttendanceMS?
-                </button>
-              </h2>
-              <div id="general2" class="accordion-collapse collapse" data-bs-parent="#generalAccordion">
-                <div class="accordion-body">
-                  AttendanceMS is designed for:
-                  <ul>
-                    <li><strong>Teachers:</strong> Mark attendance, manage classes, generate reports</li>
-                    <li><strong>School Administrators:</strong> Manage teachers, view school-wide analytics</li>
-                    <li><strong>Parents:</strong> Receive attendance notifications and view reports</li>
-                  </ul>
-                  Each user type has different permissions and access levels within the system.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">I forgot my password. How do I reset it?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>To reset your password:</p>
+            <ol>
+              <li>Click "Forgot Password?" on the login page</li>
+              <li>Enter your registered email address</li>
+              <li>Check your email for a password reset link</li>
+              <li>Click the link and create a new password</li>
+            </ol>
+            <p>If you don't receive the email, check your spam folder or contact support.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general3">
-                  Is my data secure in AttendanceMS?
-                </button>
-              </h2>
-              <div id="general3" class="accordion-collapse collapse" data-bs-parent="#generalAccordion">
-                <div class="accordion-body">
-                  Yes, we take data security seriously:
-                  <ul>
-                    <li>All data is encrypted in transit and at rest</li>
-                    <li>Regular security updates and monitoring</li>
-                    <li>Access controls and user authentication</li>
-                    <li>Regular backups to prevent data loss</li>
-                    <li>Compliance with educational data privacy standards</li>
-                  </ul>
-                  For more details, see our <a href="/help/privacy">Privacy Policy</a>.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Why can't I see my class after logging in?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#general4">
-                  How much does AttendanceMS cost?
-                </button>
-              </h2>
-              <div id="general4" class="accordion-collapse collapse" data-bs-parent="#generalAccordion">
-                <div class="accordion-body">
-                  AttendanceMS offers flexible pricing:
-                  <ul>
-                    <li><strong>Free Plan:</strong> Up to 50 students, basic features</li>
-                    <li><strong>School Plan:</strong> Unlimited students, advanced features, priority support</li>
-                    <li><strong>District Plan:</strong> Multiple schools, advanced analytics, custom integrations</li>
-                  </ul>
-                  Contact us for detailed pricing information based on your needs.
-                </div>
-              </div>
-            </div>
+          </div>
+          <div class="faq-answer">
+            <p>If you can't see your class, it could be due to:</p>
+            <ul>
+              <li><strong>New Account:</strong> You haven't created any classes yet. Click "Create Class" to get started.</li>
+              <li><strong>Permission Issue:</strong> Your account might not have the right permissions. Contact your administrator.</li>
+              <li><strong>Wrong Account:</strong> Make sure you're logged in with the correct email address.</li>
+              <li><strong>Class Assignment:</strong> An administrator needs to assign classes to your account.</li>
+            </ul>
           </div>
         </div>
       </div>
 
       <!-- Attendance FAQs -->
-      <div class="tab-pane fade" id="attendance" role="tabpanel">
-        <div class="faq-section">
-          <div class="accordion" id="attendanceAccordion">
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#attendance1">
-                  How do I mark attendance for my class?
-                </button>
-              </h2>
-              <div id="attendance1" class="accordion-collapse collapse show" data-bs-parent="#attendanceAccordion">
-                <div class="accordion-body">
-                  To mark attendance:
-                  <ol>
-                    <li>Go to "Daily Attendance" from your dashboard</li>
-                    <li>Select your class and the date</li>
-                    <li>Choose the period (if applicable)</li>
-                    <li>Mark each student as Present, Absent, Late, or Excused</li>
-                    <li>Click "Save Attendance"</li>
-                  </ol>
-                  <strong>Quick Tip:</strong> Use "Mark All Present" and then change individual students who are absent.
-                </div>
-              </div>
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-check me-2 text-primary"></i>Attendance Management</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Can I edit attendance after I've already saved it?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, you can edit attendance records:</p>
+            <ol>
+              <li>Go to "Reports" → "Class Reports"</li>
+              <li>Find the date you want to edit</li>
+              <li>Click the "Edit" button next to the attendance record</li>
+              <li>Make your changes and click "Update Attendance"</li>
+            </ol>
+            <p><strong>Note:</strong> All changes are logged for audit purposes, including who made the change and when.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#attendance2">
-                  Can I edit attendance after I've saved it?
-                </button>
-              </h2>
-              <div id="attendance2" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
-                <div class="accordion-body">
-                  Yes, you can edit attendance:
-                  <ul>
-                    <li>Go to "Attendance History" or "Edit Attendance"</li>
-                    <li>Select the date and class you want to modify</li>
-                    <li>Make your changes</li>
-                    <li>Click "Update Attendance"</li>
-                  </ul>
-                  <strong>Note:</strong> All changes are logged for audit purposes.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">What's the difference between "Absent" and "Excused"?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>The attendance statuses have different meanings:</p>
+            <ul>
+              <li><strong>Present:</strong> Student is in class</li>
+              <li><strong>Absent:</strong> Student is not in class (unexcused absence)</li>
+              <li><strong>Late:</strong> Student arrived after class started</li>
+              <li><strong>Excused:</strong> Student is absent but has a valid reason (sick leave, official event, etc.)</li>
+            </ul>
+            <p>Use "Excused" for authorized absences that shouldn't count against the student's attendance record.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#attendance3">
-                  What's the difference between Absent and Excused?
-                </button>
-              </h2>
-              <div id="attendance3" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
-                <div class="accordion-body">
-                  <ul>
-                    <li><strong>Absent:</strong> Student is not in class without prior authorization</li>
-                    <li><strong>Excused:</strong> Student is not in class but has prior authorization (sick leave, family emergency, etc.)</li>
-                  </ul>
-                  Excused absences typically don't count against attendance requirements, while unexcused absences do.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">How do I mark attendance for multiple periods in a day?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#attendance4">
-                  How do I handle late arrivals?
-                </button>
-              </h2>
-              <div id="attendance4" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
-                <div class="accordion-body">
-                  For students who arrive late:
-                  <ol>
-                    <li>Initially mark them as "Absent" when taking attendance</li>
-                    <li>When they arrive, change their status to "Late"</li>
-                    <li>Optionally, add a note with the arrival time</li>
-                  </ol>
-                  You can also set up automatic late marking based on time thresholds in your class settings.
-                </div>
-              </div>
-            </div>
+          </div>
+          <div class="faq-answer">
+            <p>For period-wise attendance:</p>
+            <ol>
+              <li>First, set up your periods in "Manage" → "Periods"</li>
+              <li>Go to your class and select "Period Attendance"</li>
+              <li>Choose the specific period you're marking</li>
+              <li>Mark attendance for that period and save</li>
+              <li>Repeat for each period</li>
+            </ol>
+            <p>This gives you more detailed tracking compared to daily attendance.</p>
           </div>
         </div>
       </div>
 
-      <!-- Technical FAQs -->
-      <div class="tab-pane fade" id="technical" role="tabpanel">
-        <div class="faq-section">
-          <div class="accordion" id="technicalAccordion">
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#technical1">
-                  I'm having trouble logging in. What should I do?
-                </button>
-              </h2>
-              <div id="technical1" class="accordion-collapse collapse show" data-bs-parent="#technicalAccordion">
-                <div class="accordion-body">
-                  If you can't log in, try these steps:
-                  <ol>
-                    <li>Check that you're using the correct email address</li>
-                    <li>Ensure your password is correct (check caps lock)</li>
-                    <li>Clear your browser cache and cookies</li>
-                    <li>Try a different browser</li>
-                    <li>Check your internet connection</li>
-                  </ol>
-                  If you still can't log in, <a href="/help/contact">contact support</a> for assistance.
-                </div>
-              </div>
+      <!-- Student Management FAQs -->
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-users me-2 text-info"></i>Student Management</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">How do I fix "CSV format error" when importing students?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>CSV format errors usually occur due to:</p>
+            <ul>
+              <li><strong>Wrong column order:</strong> Ensure columns are in this exact order: name, roll_number, email, phone, parent_name, parent_phone, parent_email</li>
+              <li><strong>Missing headers:</strong> First row should contain column names</li>
+              <li><strong>Special characters:</strong> Avoid commas, quotes, or special characters in data</li>
+              <li><strong>Empty required fields:</strong> Name and roll_number are mandatory</li>
+              <li><strong>File encoding:</strong> Save as UTF-8 CSV format</li>
+            </ul>
+            <p>Download our CSV template to ensure proper formatting.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical2">
-                  The system is running slowly. How can I fix this?
-                </button>
-              </h2>
-              <div id="technical2" class="accordion-collapse collapse" data-bs-parent="#technicalAccordion">
-                <div class="accordion-body">
-                  To improve performance:
-                  <ul>
-                    <li>Close unnecessary browser tabs</li>
-                    <li>Clear your browser cache</li>
-                    <li>Check your internet connection speed</li>
-                    <li>Use Google Chrome for best performance</li>
-                    <li>Disable browser extensions temporarily</li>
-                    <li>Restart your browser</li>
-                  </ul>
-                  If problems persist, it may be a server issue - check our status page or contact support.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Can I have duplicate roll numbers in different classes?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical3">
-                  I'm getting a "CSV format error" when importing students. What's wrong?
-                </button>
-              </h2>
-              <div id="technical3" class="accordion-collapse collapse" data-bs-parent="#technicalAccordion">
-                <div class="accordion-body">
-                  CSV import errors usually occur because:
-                  <ul>
-                    <li>Missing required columns (name, roll_no)</li>
-                    <li>Incorrect column headers</li>
-                    <li>Special characters in the data</li>
-                    <li>File encoding issues</li>
-                  </ul>
-                  <strong>Solution:</strong> Download our CSV template and ensure your data matches the format exactly.
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technical4">
-                  Can I use AttendanceMS on my mobile phone?
-                </button>
-              </h2>
-              <div id="technical4" class="accordion-collapse collapse" data-bs-parent="#technicalAccordion">
-                <div class="accordion-body">
-                  Yes! AttendanceMS is fully responsive and works on:
-                  <ul>
-                    <li>Smartphones (iOS and Android)</li>
-                    <li>Tablets</li>
-                    <li>Desktop computers</li>
-                    <li>Laptops</li>
-                  </ul>
-                  For the best mobile experience, add AttendanceMS to your home screen as a web app.
-                </div>
-              </div>
-            </div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, you can have the same roll number in different classes, but:</p>
+            <ul>
+              <li>Roll numbers must be unique within each individual class</li>
+              <li>The system treats each class separately</li>
+              <li>For example: Class A can have student with roll number "001" and Class B can also have a different student with roll number "001"</li>
+            </ul>
+            <p>However, it's recommended to use unique roll numbers across the entire institution to avoid confusion.</p>
           </div>
         </div>
       </div>
 
-      <!-- Account FAQs -->
-      <div class="tab-pane fade" id="account" role="tabpanel">
-        <div class="faq-section">
-          <div class="accordion" id="accountAccordion">
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#account1">
-                  How do I change my password?
-                </button>
-              </h2>
-              <div id="account1" class="accordion-collapse collapse show" data-bs-parent="#accountAccordion">
-                <div class="accordion-body">
-                  To change your password:
-                  <ol>
-                    <li>Go to your Profile page</li>
-                    <li>Click "Change Password"</li>
-                    <li>Enter your current password</li>
-                    <li>Enter your new password twice</li>
-                    <li>Click "Update Password"</li>
-                  </ol>
-                  <strong>Security Tip:</strong> Use a strong password with at least 8 characters, including numbers and symbols.
-                </div>
-              </div>
+      <!-- Reports & Notifications FAQs -->
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-chart-bar me-2 text-warning"></i>Reports & Notifications</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Why are SMS notifications not being sent to parents?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
+          </div>
+          <div class="faq-answer">
+            <p>SMS notifications might fail due to:</p>
+            <ul>
+              <li><strong>Incorrect phone numbers:</strong> Verify parent phone numbers are correct and include country code</li>
+              <li><strong>SMS service not configured:</strong> Administrator needs to set up SMS service (Twilio)</li>
+              <li><strong>Insufficient credits:</strong> SMS service might be out of credits</li>
+              <li><strong>Network issues:</strong> Temporary connectivity problems</li>
+              <li><strong>Blocked numbers:</strong> Some carriers block automated messages</li>
+            </ul>
+            <p>Contact your administrator to check SMS service configuration and credits.</p>
+          </div>
+        </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#account2">
-                  I forgot my password. How do I reset it?
-                </button>
-              </h2>
-              <div id="account2" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
-                <div class="accordion-body">
-                  To reset your password:
-                  <ol>
-                    <li>Go to the login page</li>
-                    <li>Click "Forgot Password?"</li>
-                    <li>Enter your email address</li>
-                    <li>Check your email for reset instructions</li>
-                    <li>Follow the link to create a new password</li>
-                  </ol>
-                  If you don't receive the email, check your spam folder or contact your administrator.
-                </div>
-              </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">How do I generate a report for students with low attendance?</h5>
+              <i class="fas fa-chevron-down"></i>
             </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#account3">
-                  How do I update my profile information?
-                </button>
-              </h2>
-              <div id="account3" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
-                <div class="accordion-body">
-                  To update your profile:
-                  <ol>
-                    <li>Click on your name in the top navigation</li>
-                    <li>Select "Profile" from the dropdown</li>
-                    <li>Edit the information you want to change</li>
-                    <li>Click "Save Changes"</li>
-                  </ol>
-                  You can update your name, phone number, profile photo, and other details.
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#account4">
-                  Can I change my email address?
-                </button>
-              </h2>
-              <div id="account4" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
-                <div class="accordion-body">
-                  Email address changes require administrator approval for security reasons:
-                  <ol>
-                    <li>Contact your school administrator</li>
-                    <li>Provide your current and new email addresses</li>
-                    <li>The administrator will update your account</li>
-                    <li>You'll receive a confirmation email at your new address</li>
-                  </ol>
-                  This process helps maintain account security and prevents unauthorized changes.
-                </div>
-              </div>
-            </div>
+          </div>
+          <div class="faq-answer">
+            <p>To generate a low attendance report:</p>
+            <ol>
+              <li>Go to "Reports" from the main menu</li>
+              <li>Select "Low Attendance Report"</li>
+              <li>Set the attendance threshold (e.g., below 75%)</li>
+              <li>Choose the date range</li>
+              <li>Select classes to include</li>
+              <li>Click "Generate Report"</li>
+              <li>Download the report in your preferred format (PDF, Excel, CSV)</li>
+            </ol>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Still Need Help -->
-    <div class="faq-section">
-      <div class="text-center">
-        <h3><i class="fas fa-question-circle me-2"></i>Still Need Help?</h3>
-        <p class="text-muted mb-4">Can't find what you're looking for? We're here to help!</p>
-        <div class="row justify-content-center">
-          <div class="col-md-4">
-            <a href="/help/contact" class="btn btn-primary btn-lg w-100 mb-3">
-              <i class="fas fa-headset me-2"></i>Contact Support
-            </a>
+      <!-- Technical Issues FAQs -->
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-cog me-2 text-secondary"></i>Technical Issues</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">The system is running slowly. What can I do?</h5>
+              <i class="fas fa-chevron-down"></i>
+            </div>
           </div>
-          <div class="col-md-4">
-            <a href="/help/videos" class="btn btn-outline-primary btn-lg w-100 mb-3">
-              <i class="fas fa-play-circle me-2"></i>Watch Tutorials
-            </a>
+          <div class="faq-answer">
+            <p>To improve system performance:</p>
+            <ul>
+              <li><strong>Check internet connection:</strong> Ensure stable internet connectivity</li>
+              <li><strong>Clear browser cache:</strong> Clear your browser's cache and cookies</li>
+              <li><strong>Close other tabs:</strong> Close unnecessary browser tabs</li>
+              <li><strong>Update browser:</strong> Use the latest version of your browser</li>
+              <li><strong>Try different browser:</strong> Test with Chrome, Firefox, or Edge</li>
+              <li><strong>Restart browser:</strong> Close and reopen your browser</li>
+            </ul>
+            <p>If issues persist, contact technical support.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Can I use the system on my mobile phone or tablet?</h5>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes! The attendance management system is fully responsive and works on:</p>
+            <ul>
+              <li><strong>Smartphones:</strong> iOS and Android devices</li>
+              <li><strong>Tablets:</strong> iPad, Android tablets</li>
+              <li><strong>Desktop computers:</strong> Windows, Mac, Linux</li>
+              <li><strong>Laptops:</strong> All operating systems</li>
+            </ul>
+            <p>The interface automatically adapts to your screen size for optimal usability.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security & Privacy FAQs -->
+      <div class="faq-category">
+        <h2 class="h3 mb-4"><i class="fas fa-shield-alt me-2 text-danger"></i>Security & Privacy</h2>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Is my data secure in the system?</h5>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, we take data security seriously:</p>
+            <ul>
+              <li><strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
+              <li><strong>Access Control:</strong> Role-based permissions ensure users only see authorized data</li>
+              <li><strong>Audit Logs:</strong> All actions are logged for security monitoring</li>
+              <li><strong>Regular Backups:</strong> Data is backed up regularly to prevent loss</li>
+              <li><strong>Secure Hosting:</strong> System hosted on secure, monitored servers</li>
+              <li><strong>Privacy Compliance:</strong> We follow data protection regulations</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">How do I change my email or phone number?</h5>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          <div class="faq-answer">
+            <p>To update your contact information:</p>
+            <ol>
+              <li>Click on your name in the top-right corner</li>
+              <li>Select "My Profile" from the dropdown</li>
+              <li>Click "Edit Profile" or "Update Information"</li>
+              <li>Change your email or phone number</li>
+              <li>Click "Save Changes"</li>
+            </ol>
+            <p>You may need to verify your new email address before the change takes effect.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Still Need Help -->
+      <div class="mt-5">
+        <div class="card bg-light">
+          <div class="card-body text-center">
+            <h3><i class="fas fa-question-circle me-2 text-primary"></i>Still Need Help?</h3>
+            <p class="mb-4">Can't find the answer you're looking for? Our support team is here to help!</p>
+            <div class="row">
+              <div class="col-md-4">
+                <a href="/help/contact" class="btn btn-primary mb-2">
+                  <i class="fas fa-envelope me-2"></i>Contact Support
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="/help/videos" class="btn btn-success mb-2">
+                  <i class="fas fa-play me-2"></i>Watch Tutorials
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="/help/how-to" class="btn btn-info mb-2">
+                  <i class="fas fa-book me-2"></i>How-To Guides
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -525,34 +400,50 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // FAQ Search functionality
+    function toggleFaq(element) {
+      const answer = element.nextElementSibling;
+      const icon = element.querySelector('i');
+      
+      if (answer.classList.contains('show')) {
+        answer.classList.remove('show');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        // Close all other open FAQs
+        document.querySelectorAll('.faq-answer.show').forEach(openAnswer => {
+          openAnswer.classList.remove('show');
+          const openIcon = openAnswer.previousElementSibling.querySelector('i');
+          openIcon.classList.remove('fa-chevron-up');
+          openIcon.classList.add('fa-chevron-down');
+        });
+        
+        // Open clicked FAQ
+        answer.classList.add('show');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      }
+    }
+
+    // Search functionality
     document.getElementById('faqSearch').addEventListener('input', function(e) {
       const searchTerm = e.target.value.toLowerCase();
-      const accordionItems = document.querySelectorAll('.accordion-item');
+      const faqItems = document.querySelectorAll('.faq-item');
       
-      accordionItems.forEach(item => {
-        const question = item.querySelector('.accordion-button').textContent.toLowerCase();
-        const answer = item.querySelector('.accordion-body').textContent.toLowerCase();
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question h5').textContent.toLowerCase();
+        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
         
         if (question.includes(searchTerm) || answer.includes(searchTerm)) {
           item.style.display = 'block';
         } else {
-          item.style.display = 'none';
+          item.style.display = searchTerm ? 'none' : 'block';
         }
       });
-    });
-
-    // Auto-expand first item in each category
-    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-      tab.addEventListener('shown.bs.tab', function(e) {
-        const targetPane = document.querySelector(e.target.getAttribute('data-bs-target'));
-        const firstAccordionItem = targetPane.querySelector('.accordion-collapse');
-        if (firstAccordionItem && !firstAccordionItem.classList.contains('show')) {
-          const button = targetPane.querySelector('.accordion-button');
-          if (button) {
-            button.click();
-          }
-        }
+      
+      // Show/hide categories based on visible items
+      document.querySelectorAll('.faq-category').forEach(category => {
+        const visibleItems = category.querySelectorAll('.faq-item[style="display: block"], .faq-item:not([style])');
+        category.style.display = (visibleItems.length > 0 || !searchTerm) ? 'block' : 'none';
       });
     });
   </script>
