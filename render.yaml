@@ -1,34 +1,25 @@
 services:
   - type: web
-    name: attendance-portal
+    name: attendance-management-system
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: node src/app.js
-    autoDeploy: true
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
     envVars:
-      - key: NODE_VERSION
-        value: 18
+      - key: NODE_ENV
+        value: production
       - key: SESSION_SECRET
         generateValue: true
-      - key: SMTP_HOST
-        value: ""
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USER
-        value: ""
-      - key: SMTP_PASS
-        value: ""
-      - key: SMTP_FROM
-        value: "School Attendance <no-reply@example.com>"
-      - key: TWILIO_SID
-        value: ""
-      - key: TWILIO_TOKEN
-        value: ""
-      - key: TWILIO_FROM
-        value: ""
-    healthCheckPath: /health
+      - key: SCHOOL_NAME
+        value: Government College Of Engineering Aurangabad
+      - key: SCHOOL_PHONE
+        value: +91-240-2400000
+      - key: SCHOOL_EMAIL
+        value: info@gcoea.ac.in
+      - key: PORT
+        value: 3000
     disk:
-      name: data
-      mountPath: /opt/render/project/src/data
+      name: attendance-data
+      mountPath: /app/data
       sizeGB: 1
