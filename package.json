@@ -11,9 +11,7 @@
     "start": "node src/app.js",
     "start:prod": "NODE_ENV=production node --enable-source-maps src/app.js",
     "start:pm2": "pm2 start ecosystem.config.js",
-    "db:init": "node src/db.js init",
-    "db:seed": "node src/db.js seed",
-    "db:reset": "rm -rf data/*.db && npm run db:init && npm run db:seed",
+    "build": "echo 'Build complete - database will initialize at runtime'",
     "lint": "eslint src/ --ext .js",
     "lint:fix": "eslint src/ --ext .js --fix",
     "test": "echo \"Tests coming soon\" && exit 0",
@@ -22,7 +20,9 @@
     "docker:run": "docker run -p 3000:3000 attendancems",
     "docker:compose": "docker-compose up -d",
     "security:audit": "npm audit --audit-level=moderate",
-    "vercel-build": "echo 'Build complete'"
+    "vercel-build": "echo 'Build complete'",
+    "render-build": "npm install",
+    "railway-build": "npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -34,7 +34,6 @@
     "express-session": "^1.17.3",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
-    "node-cron": "^4.2.1",
     "nodemailer": "^6.9.15",
     "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7",
