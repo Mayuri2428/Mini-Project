@@ -1,282 +1,293 @@
-# Contributing to AttendanceMS
+# 🤝 Contributing to AttendanceMS
 
-Thank you for your interest in contributing to AttendanceMS! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to AttendanceMS! This document provides guidelines and information for contributors.
 
-## 🚀 Quick Start for Contributors
+## 🎯 **Ways to Contribute**
 
-### Prerequisites
-- Node.js 18+ installed
-- Git installed
-- Basic knowledge of JavaScript, Node.js, and Express
+- 🐛 **Bug Reports**: Help us identify and fix issues
+- ✨ **Feature Requests**: Suggest new functionality
+- 💻 **Code Contributions**: Submit bug fixes and new features
+- 📚 **Documentation**: Improve guides and documentation
+- 🎨 **Design**: Enhance UI/UX and visual design
+- 🧪 **Testing**: Add tests and improve coverage
 
-### Local Development Setup
+## 🚀 **Getting Started**
 
-1. **Fork and Clone**
-   ```bash
-   # Fork the repository on GitHub, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/Mini-Project.git
-   cd Mini-Project
-   ```
+### **Prerequisites**
+- Node.js 16+ and npm 8+
+- Git
+- Basic knowledge of JavaScript, Express.js, and SQLite
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Setup Development Environment**
-   ```bash
-   # Initialize database
-   npm run db:init
-   npm run db:seed
-   
-   # Copy environment file
-   cp .env.example .env
-   ```
-
-4. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Access the Application**
-   - URL: http://localhost:3000
-   - Login: mjsfutane21@gmail.com / abc@1234
-
-## 📁 Project Structure
-
-```
-AttendanceMS/
-├── src/
-│   ├── routes/          # Express route handlers
-│   ├── views/           # EJS templates
-│   ├── public/          # Static assets (CSS, JS, images)
-│   ├── app.js           # Main application file
-│   └── db.js            # Database functions
-├── data/                # SQLite database files
-├── docs/                # Documentation
-├── tests/               # Test files (coming soon)
-└── package.json         # Dependencies and scripts
-```
-
-## 🛠️ Development Guidelines
-
-### Code Style
-- Use ES6+ features
-- Follow consistent indentation (2 spaces)
-- Use meaningful variable and function names
-- Add comments for complex logic
-- Use async/await for asynchronous operations
-
-### Database Guidelines
-- Use parameterized queries to prevent SQL injection
-- Follow existing table naming conventions
-- Add proper foreign key constraints
-- Include database migrations for schema changes
-
-### Frontend Guidelines
-- Use Bootstrap 5 for styling consistency
-- Ensure mobile responsiveness
-- Add proper ARIA labels for accessibility
-- Use semantic HTML elements
-
-## 🧪 Testing
-
-### Running Tests
+### **Development Setup**
 ```bash
-# Run all tests (coming soon)
-npm test
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/attendancems.git
+cd attendancems
 
-# Run tests in watch mode
-npm run test:watch
+# Install dependencies
+npm install
 
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+npm run migrate
+npm run seed  # Optional: add sample data
+
+# Start development server
+npm run dev
+```
+
+## 📋 **Development Guidelines**
+
+### **Code Style**
+- Use ESLint and Prettier configurations provided
+- Follow existing code patterns and conventions
+- Write meaningful commit messages using conventional commits
+- Add comments for complex logic
+
+### **Testing**
+- Write tests for new features and bug fixes
+- Ensure all tests pass before submitting PR
+- Maintain or improve test coverage
+- Test both happy path and edge cases
+
+### **Documentation**
+- Update README.md for significant changes
+- Add JSDoc comments for functions and classes
+- Update API documentation for endpoint changes
+- Include examples in documentation
+
+## 🔄 **Contribution Workflow**
+
+### **1. Create an Issue**
+Before starting work, create an issue to discuss:
+- Bug reports with reproduction steps
+- Feature requests with detailed descriptions
+- Questions about implementation
+
+### **2. Fork and Branch**
+```bash
+# Fork the repository on GitHub
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/attendancems.git
+
+# Create a feature branch
+git checkout -b feature/amazing-feature
+# or
+git checkout -b fix/bug-description
+```
+
+### **3. Make Changes**
+- Write clean, readable code
+- Follow existing patterns and conventions
+- Add tests for new functionality
+- Update documentation as needed
+
+### **4. Test Your Changes**
+```bash
 # Run linting
 npm run lint
+
+# Run tests
+npm test
+
+# Check test coverage
+npm run test:coverage
+
+# Test manually
+npm run dev
 ```
 
-### Writing Tests
-- Write unit tests for new functions
-- Add integration tests for API endpoints
-- Test both success and error scenarios
-- Ensure tests are independent and can run in any order
-
-## 📝 Making Changes
-
-### Branch Naming
-- `feature/description` - New features
-- `fix/description` - Bug fixes
-- `docs/description` - Documentation updates
-- `refactor/description` - Code refactoring
-
-### Commit Messages
-Follow conventional commit format:
-```
-type(scope): description
-
-Examples:
-feat(attendance): add bulk attendance marking
-fix(email): resolve SMTP connection timeout
-docs(readme): update installation instructions
+### **5. Commit Changes**
+Use conventional commit format:
+```bash
+git commit -m "feat: add user profile management"
+git commit -m "fix: resolve attendance calculation bug"
+git commit -m "docs: update API documentation"
 ```
 
-### Pull Request Process
+### **6. Submit Pull Request**
+- Push your branch to your fork
+- Create a pull request with detailed description
+- Link related issues
+- Wait for review and address feedback
 
-1. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+## 🎨 **Code Standards**
 
-2. **Make Changes**
-   - Write clean, well-documented code
-   - Add tests for new functionality
-   - Update documentation if needed
+### **JavaScript Style**
+```javascript
+// Use modern ES6+ features
+const getData = async () => {
+  try {
+    const result = await fetchData();
+    return result;
+  } catch (error) {
+    logger.error('Failed to fetch data', { error: error.message });
+    throw error;
+  }
+};
 
-3. **Test Your Changes**
-   ```bash
-   npm test
-   npm run lint
-   ```
+// Use meaningful variable names
+const attendanceRecords = await getAttendanceByClass(classId);
 
-4. **Commit Changes**
-   ```bash
-   git add .
-   git commit -m "feat(scope): description of changes"
-   ```
-
-5. **Push and Create PR**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-   Then create a Pull Request on GitHub
-
-### PR Requirements
-- [ ] Code follows project style guidelines
-- [ ] Tests pass (when available)
-- [ ] Documentation updated if needed
-- [ ] No merge conflicts
-- [ ] Descriptive PR title and description
-
-## 🐛 Bug Reports
-
-When reporting bugs, please include:
-- **Environment**: OS, Node.js version, browser
-- **Steps to Reproduce**: Clear, numbered steps
-- **Expected Behavior**: What should happen
-- **Actual Behavior**: What actually happens
-- **Screenshots**: If applicable
-- **Error Messages**: Full error text
-
-### Bug Report Template
-```markdown
-**Environment:**
-- OS: [e.g., Windows 10, macOS 12, Ubuntu 20.04]
-- Node.js: [e.g., 18.17.0]
-- Browser: [e.g., Chrome 115, Firefox 116]
-
-**Steps to Reproduce:**
-1. Go to '...'
-2. Click on '...'
-3. Scroll down to '...'
-4. See error
-
-**Expected Behavior:**
-A clear description of what you expected to happen.
-
-**Actual Behavior:**
-A clear description of what actually happened.
-
-**Screenshots:**
-If applicable, add screenshots to help explain your problem.
-
-**Additional Context:**
-Add any other context about the problem here.
+// Add JSDoc comments
+/**
+ * Calculate attendance percentage for a student
+ * @param {number} studentId - Student ID
+ * @param {string} dateRange - Date range for calculation
+ * @returns {Promise<number>} Attendance percentage
+ */
+async function calculateAttendancePercentage(studentId, dateRange) {
+  // Implementation
+}
 ```
 
-## 💡 Feature Requests
+### **Database Queries**
+```javascript
+// Use parameterized queries
+const students = await db.all(
+  'SELECT * FROM students WHERE class_id = ? AND status = ?',
+  [classId, 'active']
+);
 
-We welcome feature requests! Please:
-- Check existing issues first
-- Provide clear use case and rationale
-- Consider implementation complexity
-- Be open to discussion and feedback
-
-### Feature Request Template
-```markdown
-**Is your feature request related to a problem?**
-A clear description of what the problem is.
-
-**Describe the solution you'd like**
-A clear description of what you want to happen.
-
-**Describe alternatives you've considered**
-Alternative solutions or features you've considered.
-
-**Additional context**
-Screenshots, mockups, or examples.
+// Handle errors properly
+try {
+  await db.run('INSERT INTO attendance ...', params);
+} catch (error) {
+  logger.error('Failed to insert attendance', { error: error.message });
+  throw new Error('Attendance insertion failed');
+}
 ```
 
-## 🎯 Areas for Contribution
+### **API Endpoints**
+```javascript
+// Use proper HTTP status codes
+app.post('/api/students', async (req, res) => {
+  try {
+    const student = await createStudent(req.body);
+    res.status(201).json({ success: true, data: student });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
-### High Priority
-- [ ] Role-based access control (RBAC)
-- [ ] Bulk CSV import improvements
-- [ ] Mobile PWA features
-- [ ] Real-time updates with Socket.io
-- [ ] Accessibility improvements
+// Validate input
+const { error, value } = studentSchema.validate(req.body);
+if (error) {
+  return res.status(400).json({ success: false, error: error.details[0].message });
+}
+```
 
-### Medium Priority
-- [ ] Advanced analytics and reporting
-- [ ] Email template customization
-- [ ] Audit trail and logging
-- [ ] Performance optimizations
-- [ ] Internationalization (i18n)
+## 🧪 **Testing Guidelines**
 
-### Low Priority
-- [ ] UI/UX enhancements
-- [ ] Additional chart types
-- [ ] Export formats (PDF, Excel)
-- [ ] Integration with external systems
-- [ ] Advanced notification settings
+### **Unit Tests**
+```javascript
+describe('AttendanceService', () => {
+  describe('calculatePercentage', () => {
+    it('should calculate correct percentage', async () => {
+      const result = await attendanceService.calculatePercentage(1, '2024-01-01:2024-01-31');
+      expect(result).to.be.a('number');
+      expect(result).to.be.within(0, 100);
+    });
+  });
+});
+```
 
-## 📚 Resources
+### **Integration Tests**
+```javascript
+describe('POST /api/attendance', () => {
+  it('should create attendance record', async () => {
+    const response = await request(app)
+      .post('/api/attendance')
+      .send(validAttendanceData)
+      .expect(201);
+    
+    expect(response.body).to.have.property('success', true);
+  });
+});
+```
 
-### Learning Resources
-- [Express.js Documentation](https://expressjs.com/)
-- [EJS Template Engine](https://ejs.co/)
-- [SQLite Documentation](https://sqlite.org/docs.html)
-- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.3/)
+## 📚 **Documentation Standards**
 
-### Development Tools
-- [Node.js](https://nodejs.org/)
-- [VS Code](https://code.visualstudio.com/)
-- [Postman](https://www.postman.com/) - API testing
-- [DB Browser for SQLite](https://sqlitebrowser.org/) - Database management
+### **README Updates**
+- Keep installation instructions current
+- Update feature lists for new functionality
+- Add screenshots for UI changes
+- Update deployment instructions if needed
 
-## 🤝 Code of Conduct
+### **API Documentation**
+- Use OpenAPI/Swagger format
+- Include request/response examples
+- Document error responses
+- Add authentication requirements
 
-### Our Pledge
-We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+### **Code Comments**
+```javascript
+/**
+ * Marks attendance for multiple students in a class
+ * 
+ * @param {number} classId - The class identifier
+ * @param {Object} attendanceData - Attendance data object
+ * @param {string} attendanceData.date - Date in YYYY-MM-DD format
+ * @param {Object} attendanceData.students - Student attendance mapping
+ * @param {number} teacherId - Teacher marking attendance
+ * @returns {Promise<Object>} Result object with success status
+ * 
+ * @example
+ * const result = await markBulkAttendance(1, {
+ *   date: '2024-01-15',
+ *   students: { 1: 'present', 2: 'absent' }
+ * }, 1);
+ */
+```
 
-### Our Standards
-- Use welcoming and inclusive language
-- Be respectful of differing viewpoints
-- Gracefully accept constructive criticism
-- Focus on what is best for the community
-- Show empathy towards other community members
+## 🐛 **Bug Reports**
 
-## 📞 Getting Help
+When reporting bugs, include:
+- Clear description of the issue
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment information (OS, Node.js version, browser)
+- Screenshots or error logs if applicable
 
-- **Documentation**: Check existing docs first
-- **Issues**: Search existing issues before creating new ones
-- **Discussions**: Use GitHub Discussions for questions
-- **Email**: mjsfutane21@gmail.com for urgent matters
+## ✨ **Feature Requests**
 
-## 🏆 Recognition
+For feature requests, provide:
+- Clear description of the feature
+- Use cases and motivation
+- Proposed implementation approach
+- UI mockups if applicable
+- Consider backward compatibility
 
-Contributors will be recognized in:
-- README.md contributors section
-- Release notes for significant contributions
-- Special thanks in documentation
+## 🔒 **Security**
+
+- Never commit sensitive information (passwords, API keys)
+- Use environment variables for configuration
+- Follow security best practices
+- Report security vulnerabilities privately
+
+## 📞 **Getting Help**
+
+- 💬 **Discord**: Join our community server
+- 📧 **Email**: Contact maintainers directly
+- 📋 **Issues**: Create GitHub issues for bugs/features
+- 📖 **Documentation**: Check existing guides and docs
+
+## 🏆 **Recognition**
+
+Contributors are recognized through:
+- GitHub contributor graphs
+- Release notes mentions
+- Hall of fame in documentation
+- Special badges and swag
+- Conference speaking opportunities
+
+## 📄 **License**
+
+By contributing to AttendanceMS, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-**Thank you for contributing to AttendanceMS!** 🎉
+**Thank you for contributing to AttendanceMS! Together, we're building the future of educational technology.** 🎓✨
