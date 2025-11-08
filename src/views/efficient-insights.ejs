@@ -286,13 +286,49 @@
     </div>
 
     <div class="container-fluid mt-3">
-        <!-- Flash Messages -->
-        <% if (typeof flash !== 'undefined' && flash && flash.message) { %>
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <%= flash.message %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Alerts -->
+        <%- include('partials/alerts', { alerts: (typeof flash !== 'undefined' && flash && flash.message) ? [{ type: 'info', title: 'Info', message: flash.message }] : (alerts || []) }) %>
+
+        <!-- Filters -->
+        <div class="insight-card" style="margin-top: 0.5rem;">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Class</label>
+                    <select id="filterClass" class="form-select">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Section</label>
+                    <select id="filterSection" class="form-select">
+                        <option value="">All</option>
+                        <option>A</option>
+                        <option>B</option>
+                        <option>C</option>
+                        <option>D</option>
+                        <option>E</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Subject</label>
+                    <input id="filterSubject" class="form-control" placeholder="e.g., Mathematics" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date Range</label>
+                    <input id="filterDateRange" class="form-control" placeholder="Last 30 days" disabled />
+                </div>
+                <div class="col-md-1 text-end">
+                    <a href="/reports" id="btnExportCsv" class="insight-action action-secondary" style="width: 100%; text-decoration:none; display:inline-block; padding: .5rem 0; text-align:center;">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                </div>
+                <div class="col-md-1 text-end">
+                    <button onclick="exportFullJSON()" class="insight-action action-secondary" style="width: 100%;">
+                        <i class="fas fa-file-code"></i> JSON
+                    </button>
+                </div>
             </div>
-        <% } %>
+        </div>
 
         <!-- Top Insights -->
         <div class="top-insights" id="topInsights">
@@ -330,13 +366,57 @@
                             </div>
                             Attendance Trends (Last 30 Days)
                         </h5>
-                        <a href="/reports" class="insight-action action-secondary">
-                            <i class="fas fa-chart-bar"></i>
-                            View Reports
-                        </a>
+                        <div style="display:flex; gap:.5rem;">
+                            <button class="insight-action action-secondary" onclick="exportTrendsCSV()">
+                                <i class="fas fa-download"></i>
+                                CSV
+                            </button>
+                            <a href="/reports" class="insight-action action-secondary">
+                                <i class="fas fa-chart-bar"></i>
+                                View Reports
+                            </a>
+                        </div>
                     </div>
                     <div class="chart-container">
                         <canvas id="trendsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Subject Insights -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <h5 class="insight-title">
+                            <div class="insight-icon icon-orange">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            Subject Insights (Avg Attendance)
+                        </h5>
+                        <button class="insight-action action-secondary" onclick="exportSubjectCSV()">
+                            <i class="fas fa-download"></i>
+                            CSV
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Period Insights -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <h5 class="insight-title">
+                            <div class="insight-icon icon-blue">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            Period Insights (Avg Attendance)
+                        </h5>
+                        <button class="insight-action action-secondary" onclick="exportPeriodCSV()">
+                            <i class="fas fa-download"></i>
+                            CSV
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="periodChart"></canvas>
                     </div>
                 </div>
 
@@ -349,10 +429,16 @@
                             </div>
                             Class Performance Comparison
                         </h5>
-                        <a href="/realtime-dashboard" class="insight-action action-secondary">
-                            <i class="fas fa-broadcast-tower"></i>
-                            Live View
-                        </a>
+                        <div style="display:flex; gap:.5rem;">
+                            <button class="insight-action action-secondary" onclick="exportPerformanceCSV()">
+                                <i class="fas fa-download"></i>
+                                CSV
+                            </button>
+                            <a href="/realtime-dashboard" class="insight-action action-secondary">
+                                <i class="fas fa-broadcast-tower"></i>
+                                Live View
+                            </a>
+                        </div>
                     </div>
                     <div class="chart-container">
                         <canvas id="performanceChart"></canvas>
@@ -389,6 +475,52 @@
                     </div>
                     <div id="predictions">
                         <!-- Predictions will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Teacher Notes -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <h5 class="insight-title">
+                            <div class="insight-icon icon-blue">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            Teacher Notes
+                        </h5>
+                    </div>
+                    <form onsubmit="addTeacherNote(event)">
+                        <div class="mb-2">
+                            <label class="form-label">Note</label>
+                            <textarea id="noteText" class="form-control" rows="2" placeholder="Weekly observation or action item..."></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Student (optional)</label>
+                            <input id="noteStudentId" class="form-control" placeholder="Student ID (optional)"/>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="insight-action action-primary"><i class="fas fa-plus"></i> Add Note</button>
+                        </div>
+                    </form>
+                    <div class="mt-3" id="teacherNotes"></div>
+                </div>
+
+                <!-- Historical Comparison & Alerts Summary -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <h5 class="insight-title">
+                            <div class="insight-icon icon-orange">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            Historical Comparison & Alerts
+                        </h5>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div id="historicalComparison" style="padding: 0.5rem 0.75rem;"></div>
+                        </div>
+                        <div class="col-6">
+                            <div id="alertsSummary" style="padding: 0.5rem 0.75rem;"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -430,30 +562,137 @@
     <script>
         let trendsChart = null;
         let performanceChart = null;
+        let subjectChart = null;
+        let periodChart = null;
+        let lastInsightsData = null; // store latest loaded payload
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            populateClassesFilter();
+            attachFilterHandlers();
             loadInsightsData();
+            loadTeacherNotes();
         });
+
+        async function populateClassesFilter() {
+            try {
+                const res = await fetch('/api/teacher-classes');
+                const data = await res.json();
+                if (data.success && Array.isArray(data.classes)) {
+                    const sel = document.getElementById('filterClass');
+                    data.classes.forEach(cls => {
+                        const opt = document.createElement('option');
+                        opt.value = cls.id;
+                        opt.textContent = `${cls.name}${cls.section ? ' - ' + cls.section : ''}`;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function attachFilterHandlers() {
+            ['filterClass','filterSection','filterSubject'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', () => loadInsightsData());
+                if (id === 'filterSubject' && el) el.addEventListener('keyup', debounce(() => loadInsightsData(), 500));
+            });
+        }
+
+        function debounce(fn, wait) {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(null, args), wait); };
+        }
 
         // Load all insights data
         async function loadInsightsData() {
             try {
-                const response = await fetch('/api/teacher-insights');
+                const params = new URLSearchParams();
+                const classId = document.getElementById('filterClass')?.value || '';
+                const section = document.getElementById('filterSection')?.value || '';
+                const subject = document.getElementById('filterSubject')?.value || '';
+                if (classId) params.set('classId', classId);
+                if (section) params.set('section', section);
+                if (subject) params.set('subject', subject);
+                const qs = params.toString();
+                const response = await fetch('/api/teacher-insights' + (qs ? ('?' + qs) : ''));
                 const data = await response.json();
                 
                 if (data.success) {
+                    lastInsightsData = data;
                     updateTopInsights(data.topInsights);
                     updateLowAttendanceStudents(data.lowAttendanceStudents);
                     updateTopPerformers(data.topPerformers);
                     updatePredictions(data.predictions);
                     updateTrendsChart(data.trendsData);
                     updatePerformanceChart(data.performanceData);
+                    updateSubjectChart(data.subjectInsights || []);
+                    updatePeriodChart(data.periodInsights || []);
+                    updateHistoricalComparison(data.historicalComparison);
+                    updateAlertsSummary(data.alertsSummary);
                 }
             } catch (error) {
                 console.error('Error loading insights data:', error);
                 showMessage('Error loading insights data', 'error');
             }
+        }
+
+        // Teacher Notes UI
+        async function loadTeacherNotes() {
+            try {
+                const res = await fetch('/api/teacher-notes');
+                const data = await res.json();
+                renderTeacherNotes(data.notes || []);
+            } catch (e) {
+                renderTeacherNotes([]);
+            }
+        }
+
+        function renderTeacherNotes(notes) {
+            const container = document.getElementById('teacherNotes');
+            if (!container) return;
+            if (!notes.length) {
+                container.innerHTML = '<div style="color: var(--gray-600);">No notes yet.</div>';
+                return;
+            }
+            container.innerHTML = notes.map(n => `
+                <div class="prediction-item" style="display:flex; justify-content:space-between; align-items:start; gap:.5rem;">
+                    <div>
+                        <p class="prediction-title">Note #${n.id}</p>
+                        <p class="prediction-description">${(n.note || '').replace(/</g,'&lt;')}</p>
+                        <small class="text-muted">${n.created_at || ''}</small>
+                    </div>
+                    <button class="insight-action action-secondary" onclick="deleteTeacherNote(${n.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function addTeacherNote(ev) {
+            ev.preventDefault();
+            const note = document.getElementById('noteText')?.value?.trim();
+            const studentId = document.getElementById('noteStudentId')?.value || '';
+            if (!note) { showMessage('Please enter a note.', 'error'); return; }
+            try {
+                await fetch('/api/add-teacher-note', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId: studentId || 0, note })
+                });
+                document.getElementById('noteText').value = '';
+                document.getElementById('noteStudentId').value = '';
+                await loadTeacherNotes();
+                showMessage('Note added', 'success');
+            } catch(e) { showMessage('Failed to add note', 'error'); }
+        }
+
+        async function deleteTeacherNote(id) {
+            try {
+                await fetch('/api/delete-teacher-note', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                await loadTeacherNotes();
+                showMessage('Note deleted', 'success');
+            } catch(e) { showMessage('Failed to delete note', 'error'); }
         }
 
         // Update top insights
@@ -679,6 +918,62 @@
             });
         }
 
+        function updateSubjectChart(items) {
+            const ctx = document.getElementById('subjectChart').getContext('2d');
+            if (subjectChart) subjectChart.destroy();
+            subjectChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: items.map(i => i.subject),
+                    datasets: [{
+                        label: 'Avg Attendance %',
+                        data: items.map(i => i.rate),
+                        backgroundColor: '#7c3aed'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        }
+
+        function updatePeriodChart(items) {
+            const ctx = document.getElementById('periodChart').getContext('2d');
+            if (periodChart) periodChart.destroy();
+            periodChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: items.map(i => i.period),
+                    datasets: [{
+                        label: 'Avg Attendance %',
+                        data: items.map(i => i.rate),
+                        backgroundColor: '#059669'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        }
+
+        function updateHistoricalComparison(hc) {
+            const el = document.getElementById('historicalComparison');
+            if (!hc) { el.innerHTML = '<small>No data</small>'; return; }
+            const arrow = hc.change >= 0 ? 'arrow-up' : 'arrow-down';
+            const color = hc.change >= 0 ? 'success' : 'danger';
+            el.innerHTML = `
+                <div><strong>Current Month:</strong> ${hc.currentMonthRate}%</div>
+                <div><strong>Previous Month:</strong> ${hc.previousMonthRate}%</div>
+                <div class="text-${color}"><i class="fas fa-${arrow}"></i> Change: ${hc.change}%</div>
+            `;
+        }
+
+        function updateAlertsSummary(a) {
+            const el = document.getElementById('alertsSummary');
+            if (!a) { el.innerHTML = '<small>No data</small>'; return; }
+            el.innerHTML = `
+                <div><strong>Below Threshold:</strong> ${a.belowThresholdCount}</div>
+                <div><strong>Pending Attendance Today:</strong> ${a.pendingAttendanceCount}</div>
+                <div><strong>Notifications Sent (7d):</strong> ${a.notificationsSentLast7}</div>
+            `;
+        }
+
         // Show message
         function showMessage(message, type) {
             const alertClass = type === 'success' ? 'alert-success' : 
@@ -699,6 +994,60 @@
                     alertDiv.remove();
                 }
             }, 3000);
+        }
+
+        // Export helpers (moved from <style> to fix CSS lint errors)
+        function downloadText(filename, text, type = 'text/plain') {
+            const blob = new Blob([text], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function toCSV(rows) {
+            if (!rows || rows.length === 0) return '';
+            const headers = Object.keys(rows[0]);
+            const esc = v => ('"' + String(v ?? '').replace(/"/g,'""') + '"');
+            const lines = [headers.join(',')].concat(rows.map(r => headers.map(h => esc(r[h])).join(',')));
+            return lines.join('\n');
+        }
+
+        function exportTrendsCSV() {
+            if (!lastInsightsData?.trendsData) return showMessage('No data to export', 'error');
+            const { labels = [], attendanceRates = [] } = lastInsightsData.trendsData;
+            const rows = labels.map((d, i) => ({ date: d, attendance_rate: attendanceRates[i] ?? '' }));
+            downloadText(`insights_trends_${Date.now()}.csv`, toCSV(rows), 'text/csv');
+        }
+
+        function exportPerformanceCSV() {
+            if (!lastInsightsData?.performanceData) return showMessage('No data to export', 'error');
+            const { classNames = [], attendanceRates = [] } = lastInsightsData.performanceData;
+            const rows = classNames.map((c, i) => ({ class: c, attendance_rate: attendanceRates[i] ?? '' }));
+            downloadText(`insights_performance_${Date.now()}.csv`, toCSV(rows), 'text/csv');
+        }
+
+        function exportSubjectCSV() {
+            const items = lastInsightsData?.subjectInsights || [];
+            if (!items.length) return showMessage('No data to export', 'error');
+            const rows = items.map(i => ({ subject: i.subject, attendance_rate: i.rate }));
+            downloadText(`insights_subject_${Date.now()}.csv`, toCSV(rows), 'text/csv');
+        }
+
+        function exportPeriodCSV() {
+            const items = lastInsightsData?.periodInsights || [];
+            if (!items.length) return showMessage('No data to export', 'error');
+            const rows = items.map(i => ({ period: i.period, attendance_rate: i.rate }));
+            downloadText(`insights_period_${Date.now()}.csv`, toCSV(rows), 'text/csv');
+        }
+
+        function exportFullJSON() {
+            if (!lastInsightsData) return showMessage('No data to export', 'error');
+            downloadText(`insights_full_${Date.now()}.json`, JSON.stringify(lastInsightsData, null, 2), 'application/json');
         }
     </script>
 </body>

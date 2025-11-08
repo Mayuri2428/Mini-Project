@@ -402,13 +402,8 @@
     </div>
 
     <div class="container">
-        <!-- Flash Messages -->
-        <% if (typeof flash !== 'undefined' && flash && flash.message) { %>
-            <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
-                <%= flash.message %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <% } %>
+        <!-- Alerts -->
+        <%- include('partials/alerts', { alerts: (typeof flash !== 'undefined' && flash && flash.message) ? [{ type: 'info', title: 'Info', message: flash.message }] : (alerts || []) }) %>
 
         <div class="form-container">
             <div class="form-header">
@@ -440,17 +435,13 @@
                                     <label class="form-label" for="department">Department *</label>
                                     <select class="form-control" id="department" name="department" required>
                                         <option value="">Select Department</option>
-                                        <option value="Computer Engineering">Computer Engineering</option>
-                                        <option value="Information Technology">Information Technology</option>
-                                        <option value="Electronics & Telecommunication">Electronics & Telecommunication</option>
-                                        <option value="Mechanical Engineering">Mechanical Engineering</option>
-                                        <option value="Civil Engineering">Civil Engineering</option>
-                                        <option value="Electrical Engineering">Electrical Engineering</option>
-                                        <option value="Chemical Engineering">Chemical Engineering</option>
-                                        <option value="Automobile Engineering">Automobile Engineering</option>
-                                        <option value="Production Engineering">Production Engineering</option>
-                                        <option value="Applied Sciences">Applied Sciences</option>
-                                        <option value="Management Studies">Management Studies</option>
+                                        <option value="Civil">Civil</option>
+                                        <option value="Mech">Mech</option>
+                                        <option value="EEP">EEP</option>
+                                        <option value="CSE">CSE</option>
+                                        <option value="IT">IT</option>
+                                        <option value="MCA">MCA</option>
+                                        <option value="MTech">MTech</option>
                                     </select>
                                     <div class="invalid-feedback">Please select a department</div>
                                 </div>

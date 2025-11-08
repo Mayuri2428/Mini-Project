@@ -176,6 +176,7 @@
                                 <select class="form-select" id="date_range_type" name="date_range_type" required>
                                     <option value="current_week">Current Week</option>
                                     <option value="current_month">Current Month</option>
+                                    <option value="semester">Semester</option>
                                     <option value="last_30_days">Last 30 Days</option>
                                     <option value="custom">Custom Range</option>
                                 </select>
@@ -190,6 +191,47 @@
                                     <option value="json">View Online (JSON)</option>
                                     <option value="pdf">PDF Document</option>
                                     <option value="csv">CSV Spreadsheet</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Optional Filters -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="section" class="form-label">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    Section (Optional)
+                                </label>
+                                <select class="form-select" id="section" name="section">
+                                    <option value="">All Sections</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="E">E</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="subject" class="form-label">
+                                    <i class="fas fa-book me-1"></i>
+                                    Subject (Optional)
+                                </label>
+                                <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g., Mathematics">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="period" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Period (Optional)
+                                </label>
+                                <select class="form-select" id="period" name="period">
+                                    <option value="">All Periods</option>
+                                    <option value="09:00-10:00">09:00-10:00</option>
+                                    <option value="10:00-11:00">10:00-11:00</option>
+                                    <option value="11:00-12:00">11:00-12:00</option>
+                                    <option value="12:00-13:00">12:00-13:00</option>
+                                    <option value="14:00-15:00">14:00-15:00</option>
+                                    <option value="15:00-16:00">15:00-16:00</option>
+                                    <option value="16:00-17:00">16:00-17:00</option>
                                 </select>
                             </div>
                         </div>

@@ -1,11 +1,13 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Parser } from 'json2csv';
+import json2csv from 'json2csv';
 import PDFDocument from 'pdfkit';
 import { dbManager } from '../database/connection.js';
-import { cacheMiddleware } from '../middleware/cache.js';
+import { cacheMiddleware, createCacheMiddleware } from '../middleware/cache.js';
 
 const router = express.Router();
+
+const { Parser } = json2csv;
 
 // Enhanced Reports Dashboard
 router.get('/', async (req, res) => {
@@ -32,13 +34,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Helper to build optional filters
+function buildFilters({ classId, dateRange, section, subject, period }) {
+  const joins = ['JOIN classes c ON a.class_id = c.id'];
+  const where = ['a.class_id = ?', 'a.date BETWEEN ? AND ?'];
+  const params = [classId, dateRange.start, dateRange.end];
+
+  if (section) {
+    where.push('c.section = ?');
+    params.push(section);
+  }
+  if (subject) {
+    where.push('c.subject = ?');
+    params.push(subject);
+  }
+  if (period) {
+    where.push('a.session_time = ?');
+    params.push(period);
+  }
+
+  return { joins: joins.join(' '), where: where.join(' AND '), params };
+}
+
 // Generate Advanced Report
 router.post('/generate', [
   body('class_id').isInt().withMessage('Valid class ID required'),
   body('report_type').isIn(['daily_summary', 'weekly_analysis', 'monthly_overview', 'student_performance', 'attendance_trends']).withMessage('Valid report type required'),
-  body('date_range_type').isIn(['current_week', 'current_month', 'last_30_days', 'custom']).withMessage('Valid date range required'),
+  body('date_range_type').isIn(['current_week', 'current_month', 'semester', 'last_30_days', 'custom']).withMessage('Valid date range required'),
   body('format').isIn(['json', 'pdf', 'csv', 'excel']).withMessage('Valid format required')
-], cacheMiddleware('reports', 300), async (req, res) => {
+], createCacheMiddleware('reports', 300), async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -48,7 +72,7 @@ router.post('/generate', [
       });
     }
 
-    const { class_id, report_type, date_range_type, format, start_date, end_date } = req.body;
+    const { class_id, report_type, date_range_type, format, start_date, end_date, section = '', subject = '', period = '' } = req.body;
     
     // Calculate date range
     let dateRange = calculateDateRange(date_range_type, start_date, end_date);
@@ -57,19 +81,19 @@ router.post('/generate', [
     let reportData;
     switch (report_type) {
       case 'daily_summary':
-        reportData = await generateDailySummary(class_id, dateRange);
+        reportData = await generateDailySummary(class_id, dateRange, { section, subject, period });
         break;
       case 'weekly_analysis':
-        reportData = await generateWeeklyAnalysis(class_id, dateRange);
+        reportData = await generateWeeklyAnalysis(class_id, dateRange, { section, subject, period });
         break;
       case 'monthly_overview':
-        reportData = await generateMonthlyOverview(class_id, dateRange);
+        reportData = await generateMonthlyOverview(class_id, dateRange, { section, subject, period });
         break;
       case 'student_performance':
-        reportData = await generateStudentPerformance(class_id, dateRange);
+        reportData = await generateStudentPerformance(class_id, dateRange, { section, subject, period });
         break;
       case 'attendance_trends':
-        reportData = await generateAttendanceTrends(class_id, dateRange);
+        reportData = await generateAttendanceTrends(class_id, dateRange, { section, subject, period });
         break;
       default:
         throw new Error('Invalid report type');
@@ -114,6 +138,16 @@ function calculateDateRange(type, startDate, endDate) {
       start = new Date(now.getFullYear(), now.getMonth(), 1);
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       break;
+    case 'semester':
+      // Assume two semesters: Jan 1 - Jun 30, Jul 1 - Dec 31
+      if (now.getMonth() < 6) { // 0-5 => Jan-Jun
+        start = new Date(now.getFullYear(), 0, 1);
+        end = new Date(now.getFullYear(), 5, 30);
+      } else { // Jul-Dec
+        start = new Date(now.getFullYear(), 6, 1);
+        end = new Date(now.getFullYear(), 11, 31);
+      }
+      break;
     case 'last_30_days':
       end = new Date();
       start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -133,7 +167,8 @@ function calculateDateRange(type, startDate, endDate) {
   };
 }
 
-async function generateDailySummary(classId, dateRange) {
+async function generateDailySummary(classId, dateRange, { section = '', subject = '', period = '' } = {}) {
+  const { joins, where, params } = buildFilters({ classId, dateRange, section, subject, period });
   const attendanceData = await dbManager.executeQuery(`
     SELECT 
       a.date,
@@ -143,10 +178,11 @@ async function generateDailySummary(classId, dateRange) {
       SUM(CASE WHEN a.status = 'late' THEN 1 ELSE 0 END) as late_count,
       ROUND(AVG(CASE WHEN a.status = 'present' THEN 100.0 ELSE 0 END), 2) as attendance_percentage
     FROM attendance a
-    WHERE a.class_id = ? AND a.date BETWEEN ? AND ?
+    ${joins}
+    WHERE ${where}
     GROUP BY a.date
     ORDER BY a.date DESC
-  `, [classId, dateRange.start, dateRange.end]);
+  `, params);
 
   const classInfo = await dbManager.executeQuery(`
     SELECT c.*, COUNT(s.id) as total_enrolled
@@ -174,7 +210,8 @@ async function generateDailySummary(classId, dateRange) {
   };
 }
 
-async function generateWeeklyAnalysis(classId, dateRange) {
+async function generateWeeklyAnalysis(classId, dateRange, { section = '', subject = '', period = '' } = {}) {
+  const { joins, where, params } = buildFilters({ classId, dateRange, section, subject, period });
   const weeklyData = await dbManager.executeQuery(`
     SELECT 
       strftime('%Y-%W', a.date) as week,
@@ -187,10 +224,11 @@ async function generateWeeklyAnalysis(classId, dateRange) {
       SUM(CASE WHEN a.status = 'late' THEN 1 ELSE 0 END) as late_count,
       ROUND(AVG(CASE WHEN a.status = 'present' THEN 100.0 ELSE 0 END), 2) as attendance_percentage
     FROM attendance a
-    WHERE a.class_id = ? AND a.date BETWEEN ? AND ?
+    ${joins}
+    WHERE ${where}
     GROUP BY strftime('%Y-%W', a.date)
     ORDER BY week DESC
-  `, [classId, dateRange.start, dateRange.end]);
+  `, params);
 
   return {
     type: 'weekly_analysis',
@@ -211,7 +249,27 @@ async function generateWeeklyAnalysis(classId, dateRange) {
   };
 }
 
-async function generateStudentPerformance(classId, dateRange) {
+async function generateStudentPerformance(classId, dateRange, { section = '', subject = '', period = '' } = {}) {
+  // Build filters; join to classes and filter attendance by optional period
+  const base = buildFilters({ classId, dateRange, section, subject, period });
+  // For student performance we need LEFT JOIN attendance, so rebuild WHERE accordingly
+  const where = ['s.class_id = ?'];
+  const params = [classId];
+  let attendanceDateFilter = 'a.date BETWEEN ? AND ?';
+  params.push(dateRange.start, dateRange.end);
+  if (period) {
+    attendanceDateFilter += ' AND a.session_time = ?';
+    params.push(period);
+  }
+  if (section) {
+    where.push('c.section = ?');
+    params.push(section);
+  }
+  if (subject) {
+    where.push('c.subject = ?');
+    params.push(subject);
+  }
+
   const studentData = await dbManager.executeQuery(`
     SELECT 
       s.id,
@@ -228,12 +286,12 @@ async function generateStudentPerformance(classId, dateRange) {
       MIN(a.date) as first_class,
       MAX(a.date) as last_class
     FROM students s
-    LEFT JOIN attendance a ON s.id = a.student_id 
-      AND a.date BETWEEN ? AND ?
-    WHERE s.class_id = ?
+    JOIN classes c ON s.class_id = c.id
+    LEFT JOIN attendance a ON s.id = a.student_id AND a.class_id = s.class_id AND ${attendanceDateFilter}
+    WHERE ${where.join(' AND ')}
     GROUP BY s.id, s.name, s.roll_no
     ORDER BY attendance_percentage DESC
-  `, [dateRange.start, dateRange.end, classId]);
+  `, params);
 
   // Categorize students
   const categories = {

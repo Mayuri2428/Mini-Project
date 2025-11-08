@@ -405,13 +405,8 @@
     </div>
 
     <div class="container-fluid mt-3">
-        <!-- Flash Messages -->
-        <% if (typeof flash !== 'undefined' && flash && flash.message) { %>
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <%= flash.message %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <% } %>
+        <!-- Alerts -->
+        <%- include('partials/alerts', { alerts: (typeof flash !== 'undefined' && flash && flash.message) ? [{ type: 'info', title: 'Info', message: flash.message }] : (alerts || []) }) %>
 
         <!-- Quick Filters -->
         <div class="quick-filters">

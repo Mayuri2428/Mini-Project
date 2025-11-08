@@ -1,0 +1,19 @@
+<% if (typeof alerts !== 'undefined' && Array.isArray(alerts) && alerts.length) { %>
+  <div id="alerts-container" class="mb-3">
+    <% alerts.forEach(function(a){ %>
+      <% const map = { success: {cls: 'success', icon: '✅'}, info: {cls: 'info', icon: 'ℹ'}, warning: {cls: 'warning', icon: '⚠'}, error: {cls: 'danger', icon: '❌'}, system: {cls: 'secondary', icon: '🛠'} }; %>
+      <% const m = map[a.type] || map.info; %>
+      <div class="alert alert-<%= m.cls %> alert-dismissible fade show" role="alert">
+        <span class="me-1"><%= m.icon %></span>
+        <strong><%= (a.title || a.type || 'Info').toString() %>:</strong>
+        <span> <%= (a.message || '').toString() %></span>
+        <% if (a.details) { %>
+          <div class="small mt-1"><%= a.details.toString() %></div>
+        <% } %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <div id="alerts-container" class="mb-3"></div>
+<% } %>

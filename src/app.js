@@ -31,7 +31,7 @@ import { dbManager } from './database/connection.js';
 import authRouter from './routes/auth.js';
 import dashboardRouter from './routes/dashboard.js';
 import attendanceRouter from './routes/attendance.js';
-import { migrate, ensureDefaultTeacher } from './db.js';
+import { migrate, ensureDefaultTeacher, all } from './db.js';
 import reportsRouter from './routes/reports.js';
 import importRouter from './routes/import.js';
 import periodsRouter from './routes/periods.js';
@@ -236,7 +236,7 @@ const initializeApplication = async () => {
 // Initialize application
 initializeApplication();
 
-const port = process.env.PORT || process.env.CODESPACE_NAME ? 8080 : 3000;
+const port = process.env.PORT || (process.env.CODESPACE_NAME ? 8080 : 3000);
 
 // Only start server if not in Vercel
 if (process.env.VERCEL !== '1') {

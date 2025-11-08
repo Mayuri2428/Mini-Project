@@ -1,0 +1,287 @@
+<!-- Core JavaScript Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- Socket.IO for Real-time Features -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- AttendanceMS Core Modules -->
+<script src="/js/api-client.js"></script>
+<script src="/js/loading-states.js"></script>
+<script src="/js/toast-notifications.js"></script>
+<script src="/js/alert-system.js"></script>
+<script src="/js/help-widget.js"></script>
+
+<!-- Global Utilities -->
+<script>
+  // Initialize tooltips
+  document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+
+  // Dark mode toggle
+  function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    const icon = document.getElementById('darkModeIcon');
+    const text = document.getElementById('darkModeText');
+    
+    if (newTheme === 'dark') {
+      icon.className = 'fas fa-sun me-2';
+      text.textContent = 'Light Mode';
+    } else {
+      icon.className = 'fas fa-moon me-2';
+      text.textContent = 'Dark Mode';
+    }
+  }
+
+  // Load saved theme
+  (function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const icon = document.getElementById('darkModeIcon');
+    const text = document.getElementById('darkModeText');
+    
+    if (icon && text) {
+      if (savedTheme === 'dark') {
+        icon.className = 'fas fa-sun me-2';
+        text.textContent = 'Light Mode';
+      } else {
+        icon.className = 'fas fa-moon me-2';
+        text.textContent = 'Dark Mode';
+      }
+    }
+  })();
+
+  // Update current time
+  function updateTime() {
+    const timeElement = document.getElementById('currentTime');
+    if (timeElement) {
+      const now = new Date();
+      timeElement.textContent = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+  }
+
+  // Update time every second
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  // Global error handler
+  window.addEventListener('error', function(event) {
+    console.error('Global error:', event.error);
+    if (window.toast) {
+      toast.error('An unexpected error occurred. Please try again.');
+    }
+  });
+
+  // Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    if (window.toast) {
+      toast.error('An error occurred while processing your request.');
+    }
+  });
+
+  // Confirm before leaving page with unsaved changes
+  let hasUnsavedChanges = false;
+
+  window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    }
+  });
+
+  // Mark form as having unsaved changes
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form[data-confirm-leave]');
+    forms.forEach(form => {
+      const inputs = form.querySelectorAll('input, textarea, select');
+      inputs.forEach(input => {
+        input.addEventListener('change', () => {
+          hasUnsavedChanges = true;
+        });
+      });
+
+      form.addEventListener('submit', () => {
+        hasUnsavedChanges = false;
+      });
+    });
+  });
+
+  // Auto-save functionality
+  function setupAutoSave(formSelector, saveCallback, interval = 30000) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    let autoSaveTimer;
+    const inputs = form.querySelectorAll('input, textarea, select');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+          saveCallback(data);
+          if (window.toast) {
+            toast.info('Changes auto-saved', { duration: 2000 });
+          }
+        }, interval);
+      });
+    });
+  }
+
+  // Format date helper
+  function formatDate(date, format = 'short') {
+    const d = new Date(date);
+    
+    if (format === 'short') {
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } else if (format === 'long') {
+      return d.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } else if (format === 'time') {
+      return d.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } else if (format === 'datetime') {
+      return d.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+    
+    return d.toLocaleDateString();
+  }
+
+  // Format time ago helper
+  function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+      second: 1
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+      const interval = Math.floor(seconds / secondsInUnit);
+      if (interval >= 1) {
+        return interval === 1 ? `1 ${unit} ago` : `${interval} ${unit}s ago`;
+      }
+    }
+    
+    return 'just now';
+  }
+
+  // Copy to clipboard helper
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (window.toast) {
+        toast.success('Copied to clipboard!', { duration: 2000 });
+      }
+      return true;
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      if (window.toast) {
+        toast.error('Failed to copy to clipboard');
+      }
+      return false;
+    }
+  }
+
+  // Download file helper
+  function downloadFile(data, filename, type = 'text/plain') {
+    const blob = new Blob([data], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  // Export data as CSV
+  function exportToCSV(data, filename = 'export.csv') {
+    if (!data || data.length === 0) {
+      if (window.toast) {
+        toast.warning('No data to export');
+      }
+      return;
+    }
+
+    const headers = Object.keys(data[0]);
+    const csv = [
+      headers.join(','),
+      ...data.map(row => headers.map(header => {
+        const value = row[header];
+        return typeof value === 'string' && value.includes(',') 
+          ? `"${value}"` 
+          : value;
+      }).join(','))
+    ].join('\n');
+
+    downloadFile(csv, filename, 'text/csv');
+    
+    if (window.toast) {
+      toast.success('Data exported successfully!');
+    }
+  }
+
+  // Print helper
+  function printElement(selector) {
+    const element = document.querySelector(selector);
+    if (!element) return;
+
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Print</title>');
+    printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(element.innerHTML);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+  }
+
+  // Make utilities globally available
+  window.formatDate = formatDate;
+  window.timeAgo = timeAgo;
+  window.copyToClipboard = copyToClipboard;
+  window.downloadFile = downloadFile;
+  window.exportToCSV = exportToCSV;
+  window.printElement = printElement;
+  window.setupAutoSave = setupAutoSave;
+</script>
